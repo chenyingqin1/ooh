@@ -1,0 +1,7 @@
+{
+  "navigationStyle": "default",
+  "navigationBarTitleText": "查看图片",
+  "usingComponents": {
+    "uni-popup": "/components/uni/uni-popup/uni-popup"
+  }
+}

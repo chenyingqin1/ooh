@@ -1,0 +1,26 @@
+.title{
+	position: fixed;
+	top: 0;
+	right: 0;
+	background: #ededed;
+	color: #39828b; 
+	flex-shrink: 0;
+	z-index: 9;
+	width: 100%;
+	text-align: center;
+	view{
+		display: inline-block;
+		padding: 30rpx 0;
+	}
+}
+.info{
+	background: #fff;
+	text-align: center;
+	.list{
+		border-bottom: 2rpx solid #f2f2f2;
+		view{
+			display: inline-block;
+			padding: 40rpx 0;
+		}
+	}
+}

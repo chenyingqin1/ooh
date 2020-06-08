@@ -1,0 +1,63 @@
+{
+  "pages": [
+    "pages/login/login",
+    "pages/index/index",
+    "pages/myList/myList",
+    "pages/speed/speed",
+    "pages/more/more",
+    "pages/statement/statement",
+    "pages/about/about",
+    "pages/location/location",
+    "pages/details/details",
+    "pages/photoSubmission/photoSubmission",
+    "pages/pictureDet/pictureDet"
+  ],
+  "subPackages": [],
+  "window": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "户外监控",
+    "navigationBarBackgroundColor": "#f8f8f8",
+    "backgroundColor": "#f8f8f8",
+    "backgroundColorTop": "#F4F5F6",
+    "backgroundColorBottom": "#F4F5F6"
+  },
+  "tabBar": {
+    "color": "#9f9fa0",
+    "selectedColor": "#398188",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "任务",
+        "iconPath": "static/task-icon.png",
+        "selectedIconPath": "static/task-icon-cur.png"
+      },
+      {
+        "pagePath": "pages/myList/myList",
+        "text": "清单",
+        "iconPath": "static/list-icon.png",
+        "selectedIconPath": "static/list-icon-cur.png"
+      },
+      {
+        "pagePath": "pages/speed/speed",
+        "text": "进度",
+        "iconPath": "static/progress-icon.png",
+        "selectedIconPath": "static/progress-icon-cur.png"
+      },
+      {
+        "pagePath": "pages/more/more",
+        "text": "更多",
+        "iconPath": "static/more-icon.png",
+        "selectedIconPath": "static/more-icon-cur.png"
+      }
+    ]
+  },
+  "permission": {
+    "scope.userLocation": {
+      "desc": "用于为你推荐更精准的产品信息"
+    }
+  },
+  "navigateToMiniProgramAppIdList": [],
+  "plugins": {},
+  "usingComponents": {},
+  "sitemapLocation": "sitemap26.json"
+}

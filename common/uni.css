@@ -1,0 +1,44 @@
+@font-face {
+	font-family: uniicons;
+	font-weight: normal;
+	font-style: normal;
+	src: url('./static/uni.ttf') format('truetype');
+}
+
+/*通用 */
+
+	view,
+	scroll-view,
+	swiper,
+	swiper-item,
+	cover-view,
+	cover-image,
+	icon,
+	text,
+	rich-text,
+	progress,
+	button,
+	checkbox,
+	form,
+	input,
+	label,
+	radio,
+	slider,
+	switch,
+	textarea,
+	navigator,
+	audio,
+	camera,
+	image,
+	video {
+		line-height: 1;
+		box-sizing: border-box;
+		flex-shrink: 0;
+	}
+	view{
+		font-family: '黑体','sans-serif';
+		box-sizing: border-box;
+	}
+	image{
+		height:auto;
+	}
