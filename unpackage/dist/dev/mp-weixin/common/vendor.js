@@ -245,12 +245,16 @@ var SYNC_API_RE =
 
 var CONTEXT_API_RE = /^create|Manager$/;
 
+// Context例外情况
+var CONTEXT_API_RE_EXC = ['createBLEConnection'];
+
+// 同步例外情况
 var ASYNC_API = ['createBLEConnection'];
 
 var CALLBACK_API_RE = /^on|^off/;
 
 function isContextApi(name) {
-  return CONTEXT_API_RE.test(name);
+  return CONTEXT_API_RE.test(name) && CONTEXT_API_RE_EXC.indexOf(name) === -1;
 }
 function isSyncApi(name) {
   return SYNC_API_RE.test(name) && ASYNC_API.indexOf(name) === -1;
@@ -354,14 +358,12 @@ var interceptors = {
   promiseInterceptor: promiseInterceptor };
 
 
-
-
 var baseApi = /*#__PURE__*/Object.freeze({
   __proto__: null,
   upx2px: upx2px,
-  interceptors: interceptors,
   addInterceptor: addInterceptor,
-  removeInterceptor: removeInterceptor });
+  removeInterceptor: removeInterceptor,
+  interceptors: interceptors });
 
 
 var previewImage = {
@@ -604,8 +606,6 @@ var eventApi = /*#__PURE__*/Object.freeze({
   $emit: $emit });
 
 
-
-
 var api = /*#__PURE__*/Object.freeze({
   __proto__: null });
 
@@ -720,10 +720,10 @@ function initVueComponent(Vue, vueOptions) {
   var VueComponent;
   if (isFn(vueOptions)) {
     VueComponent = vueOptions;
-    vueOptions = VueComponent.extendOptions;
   } else {
     VueComponent = Vue.extend(vueOptions);
   }
+  vueOptions = VueComponent.options;
   return [VueComponent, vueOptions];
 }
 
@@ -757,7 +757,7 @@ function initData(vueOptions, context) {
     try {
       data = data.call(context); // 支持 Vue.prototype 上挂的数据
     } catch (e) {
-      if (Object({"NODE_ENV":"development","VUE_APP_PLATFORM":"mp-weixin","BASE_URL":"/"}).VUE_APP_DEBUG) {
+      if (Object({"VUE_APP_PLATFORM":"mp-weixin","NODE_ENV":"development","BASE_URL":"/"}).VUE_APP_DEBUG) {
         console.warn('根据 Vue 的 data 函数初始化小程序 data 失败，请尽量确保 data 函数中不访问 vm 对象，否则可能影响首次数据渲染速度。', data);
       }
     }
@@ -792,14 +792,14 @@ function createObserver(name) {
 }
 
 function initBehaviors(vueOptions, initBehavior) {
-  var vueBehaviors = vueOptions['behaviors'];
-  var vueExtends = vueOptions['extends'];
-  var vueMixins = vueOptions['mixins'];
+  var vueBehaviors = vueOptions.behaviors;
+  var vueExtends = vueOptions.extends;
+  var vueMixins = vueOptions.mixins;
 
-  var vueProps = vueOptions['props'];
+  var vueProps = vueOptions.props;
 
   if (!vueProps) {
-    vueOptions['props'] = vueProps = [];
+    vueOptions.props = vueProps = [];
   }
 
   var behaviors = [];
@@ -811,11 +811,11 @@ function initBehaviors(vueOptions, initBehavior) {
           vueProps.push('name');
           vueProps.push('value');
         } else {
-          vueProps['name'] = {
+          vueProps.name = {
             type: String,
             default: '' };
 
-          vueProps['value'] = {
+          vueProps.value = {
             type: [String, Number, Boolean, Array, Object, Date],
             default: '' };
 
@@ -884,7 +884,7 @@ function initProperties(props) {var isBehavior = arguments.length > 1 && argumen
     Object.keys(props).forEach(function (key) {
       var opts = props[key];
       if (isPlainObject(opts)) {// title:{type:String,default:''}
-        var value = opts['default'];
+        var value = opts.default;
         if (isFn(value)) {
           value = value();
         }
@@ -921,6 +921,11 @@ function wrapper$1(event) {
 
   if (!hasOwn(event, 'detail')) {
     event.detail = {};
+  }
+
+  if (hasOwn(event, 'markerId')) {
+    event.detail = typeof event.detail === 'object' ? event.detail : {};
+    event.detail.markerId = event.markerId;
   }
 
   if (isPlainObject(event.detail)) {
@@ -1075,11 +1080,11 @@ function handleEvent(event) {var _this = this;
   // [['tap',[['handle',[1,2,a]],['handle1',[1,2,a]]]]]
   var dataset = (event.currentTarget || event.target).dataset;
   if (!dataset) {
-    return console.warn("\u4E8B\u4EF6\u4FE1\u606F\u4E0D\u5B58\u5728");
+    return console.warn('事件信息不存在');
   }
   var eventOpts = dataset.eventOpts || dataset['event-opts']; // 支付宝 web-view 组件 dataset 非驼峰
   if (!eventOpts) {
-    return console.warn("\u4E8B\u4EF6\u4FE1\u606F\u4E0D\u5B58\u5728");
+    return console.warn('事件信息不存在');
   }
 
   // [['handle',[1,2,a]],['handle1',[1,2,a]]]
@@ -1338,8 +1343,8 @@ function parseBaseComponent(vueComponentOptions)
 
   {
     // 微信 multipleSlots 部分情况有 bug，导致内容顺序错乱 如 u-list，提供覆盖选项
-    if (vueOptions['mp-weixin'] && vueOptions['mp-weixin']['options']) {
-      Object.assign(options, vueOptions['mp-weixin']['options']);
+    if (vueOptions['mp-weixin'] && vueOptions['mp-weixin'].options) {
+      Object.assign(options, vueOptions['mp-weixin'].options);
     }
   }
 
@@ -1404,6 +1409,10 @@ function parseBaseComponent(vueComponentOptions)
       __e: handleEvent } };
 
 
+  // externalClasses
+  if (vueOptions.externalClasses) {
+    componentOptions.externalClasses = vueOptions.externalClasses;
+  }
 
   if (Array.isArray(vueOptions.wxsCallMethods)) {
     vueOptions.wxsCallMethods.forEach(function (callMethod) {
@@ -6525,10 +6534,10 @@ function initMixin (Vue) {
     initEvents(vm);
     initRender(vm);
     callHook(vm, 'beforeCreate');
-    vm.mpHost !== 'mp-toutiao' && initInjections(vm); // resolve injections before data/props  
+    !vm._$fallback && initInjections(vm); // resolve injections before data/props  
     initState(vm);
-    vm.mpHost !== 'mp-toutiao' && initProvide(vm); // resolve provide after data/props
-    vm.mpHost !== 'mp-toutiao' && callHook(vm, 'created');      
+    !vm._$fallback && initProvide(vm); // resolve provide after data/props
+    !vm._$fallback && callHook(vm, 'created');      
 
     /* istanbul ignore if */
     if ( true && config.performance && mark) {
@@ -7086,7 +7095,7 @@ function type(obj) {
 
 function flushCallbacks$1(vm) {
     if (vm.__next_tick_callbacks && vm.__next_tick_callbacks.length) {
-        if (Object({"NODE_ENV":"development","VUE_APP_PLATFORM":"mp-weixin","BASE_URL":"/"}).VUE_APP_DEBUG) {
+        if (Object({"VUE_APP_PLATFORM":"mp-weixin","NODE_ENV":"development","BASE_URL":"/"}).VUE_APP_DEBUG) {
             var mpInstance = vm.$scope;
             console.log('[' + (+new Date) + '][' + (mpInstance.is || mpInstance.route) + '][' + vm._uid +
                 ']:flushCallbacks[' + vm.__next_tick_callbacks.length + ']');
@@ -7107,14 +7116,14 @@ function nextTick$1(vm, cb) {
     //1.nextTick 之前 已 setData 且 setData 还未回调完成
     //2.nextTick 之前存在 render watcher
     if (!vm.__next_tick_pending && !hasRenderWatcher(vm)) {
-        if(Object({"NODE_ENV":"development","VUE_APP_PLATFORM":"mp-weixin","BASE_URL":"/"}).VUE_APP_DEBUG){
+        if(Object({"VUE_APP_PLATFORM":"mp-weixin","NODE_ENV":"development","BASE_URL":"/"}).VUE_APP_DEBUG){
             var mpInstance = vm.$scope;
             console.log('[' + (+new Date) + '][' + (mpInstance.is || mpInstance.route) + '][' + vm._uid +
                 ']:nextVueTick');
         }
         return nextTick(cb, vm)
     }else{
-        if(Object({"NODE_ENV":"development","VUE_APP_PLATFORM":"mp-weixin","BASE_URL":"/"}).VUE_APP_DEBUG){
+        if(Object({"VUE_APP_PLATFORM":"mp-weixin","NODE_ENV":"development","BASE_URL":"/"}).VUE_APP_DEBUG){
             var mpInstance$1 = vm.$scope;
             console.log('[' + (+new Date) + '][' + (mpInstance$1.is || mpInstance$1.route) + '][' + vm._uid +
                 ']:nextMPTick');
@@ -7190,7 +7199,7 @@ var patch = function(oldVnode, vnode) {
     });
     var diffData = this.$shouldDiffData === false ? data : diff(data, mpData);
     if (Object.keys(diffData).length) {
-      if (Object({"NODE_ENV":"development","VUE_APP_PLATFORM":"mp-weixin","BASE_URL":"/"}).VUE_APP_DEBUG) {
+      if (Object({"VUE_APP_PLATFORM":"mp-weixin","NODE_ENV":"development","BASE_URL":"/"}).VUE_APP_DEBUG) {
         console.log('[' + (+new Date) + '][' + (mpInstance.is || mpInstance.route) + '][' + this._uid +
           ']差量更新',
           JSON.stringify(diffData));
@@ -7244,7 +7253,7 @@ function mountComponent$1(
     }
   }
   
-  vm.mpHost !== 'mp-toutiao' && callHook(vm, 'beforeMount');
+  !vm._$fallback && callHook(vm, 'beforeMount');
 
   var updateComponent = function () {
     vm._update(vm._render(), hydrating);
@@ -7614,940 +7623,22 @@ module.exports = g;
 
 /***/ }),
 /* 4 */
-/*!*************************!*\
-  !*** D:/OOH/pages.json ***!
-  \*************************/
+/*!*************************************!*\
+  !*** D:/project/git/OOH/pages.json ***!
+  \*************************************/
 /*! no static exports found */
 /***/ (function(module, exports) {
 
 
 
 /***/ }),
-/* 5 */
-/*!*******************************************************!*\
-  !*** ./node_modules/@dcloudio/uni-stat/dist/index.js ***!
-  \*******************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(uni) {var _package = __webpack_require__(/*! ../package.json */ 6);function _createSuper(Derived) {return function () {var Super = _getPrototypeOf(Derived),result;if (_isNativeReflectConstruct()) {var NewTarget = _getPrototypeOf(this).constructor;result = Reflect.construct(Super, arguments, NewTarget);} else {result = Super.apply(this, arguments);}return _possibleConstructorReturn(this, result);};}function _possibleConstructorReturn(self, call) {if (call && (typeof call === "object" || typeof call === "function")) {return call;}return _assertThisInitialized(self);}function _assertThisInitialized(self) {if (self === void 0) {throw new ReferenceError("this hasn't been initialised - super() hasn't been called");}return self;}function _isNativeReflectConstruct() {if (typeof Reflect === "undefined" || !Reflect.construct) return false;if (Reflect.construct.sham) return false;if (typeof Proxy === "function") return true;try {Date.prototype.toString.call(Reflect.construct(Date, [], function () {}));return true;} catch (e) {return false;}}function _getPrototypeOf(o) {_getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) {return o.__proto__ || Object.getPrototypeOf(o);};return _getPrototypeOf(o);}function _inherits(subClass, superClass) {if (typeof superClass !== "function" && superClass !== null) {throw new TypeError("Super expression must either be null or a function");}subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } });if (superClass) _setPrototypeOf(subClass, superClass);}function _setPrototypeOf(o, p) {_setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) {o.__proto__ = p;return o;};return _setPrototypeOf(o, p);}function _classCallCheck(instance, Constructor) {if (!(instance instanceof Constructor)) {throw new TypeError("Cannot call a class as a function");}}function _defineProperties(target, props) {for (var i = 0; i < props.length; i++) {var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);}}function _createClass(Constructor, protoProps, staticProps) {if (protoProps) _defineProperties(Constructor.prototype, protoProps);if (staticProps) _defineProperties(Constructor, staticProps);return Constructor;}
-
-var STAT_VERSION = _package.version;
-var STAT_URL = 'https://tongji.dcloud.io/uni/stat';
-var STAT_H5_URL = 'https://tongji.dcloud.io/uni/stat.gif';
-var PAGE_PVER_TIME = 1800;
-var APP_PVER_TIME = 300;
-var OPERATING_TIME = 10;
-
-var UUID_KEY = '__DC_STAT_UUID';
-var UUID_VALUE = '__DC_UUID_VALUE';
-
-function getUuid() {
-  var uuid = '';
-  if (getPlatformName() === 'n') {
-    try {
-      uuid = plus.runtime.getDCloudId();
-    } catch (e) {
-      uuid = '';
-    }
-    return uuid;
-  }
-
-  try {
-    uuid = uni.getStorageSync(UUID_KEY);
-  } catch (e) {
-    uuid = UUID_VALUE;
-  }
-
-  if (!uuid) {
-    uuid = Date.now() + '' + Math.floor(Math.random() * 1e7);
-    try {
-      uni.setStorageSync(UUID_KEY, uuid);
-    } catch (e) {
-      uni.setStorageSync(UUID_KEY, UUID_VALUE);
-    }
-  }
-  return uuid;
-}
-
-var getSgin = function getSgin(statData) {
-  var arr = Object.keys(statData);
-  var sortArr = arr.sort();
-  var sgin = {};
-  var sginStr = '';
-  for (var i in sortArr) {
-    sgin[sortArr[i]] = statData[sortArr[i]];
-    sginStr += sortArr[i] + '=' + statData[sortArr[i]] + '&';
-  }
-  // const options = sginStr.substr(0, sginStr.length - 1)
-  // sginStr = sginStr.substr(0, sginStr.length - 1) + '&key=' + STAT_KEY;
-  // const si = crypto.createHash('md5').update(sginStr).digest('hex');
-  return {
-    sign: '',
-    options: sginStr.substr(0, sginStr.length - 1) };
-
-};
-
-var getSplicing = function getSplicing(data) {
-  var str = '';
-  for (var i in data) {
-    str += i + '=' + data[i] + '&';
-  }
-  return str.substr(0, str.length - 1);
-};
-
-var getTime = function getTime() {
-  return parseInt(new Date().getTime() / 1000);
-};
-
-var getPlatformName = function getPlatformName() {
-  var platformList = {
-    'app-plus': 'n',
-    'h5': 'h5',
-    'mp-weixin': 'wx',
-    'mp-alipay': 'ali',
-    'mp-baidu': 'bd',
-    'mp-toutiao': 'tt',
-    'mp-qq': 'qq' };
-
-  return platformList["mp-weixin"];
-};
-
-var getPackName = function getPackName() {
-  var packName = '';
-  if (getPlatformName() === 'wx' || getPlatformName() === 'qq') {
-    // 兼容微信小程序低版本基础库
-    if (uni.canIUse('getAccountInfoSync')) {
-      packName = uni.getAccountInfoSync().miniProgram.appId || '';
-    }
-  }
-  return packName;
-};
-
-var getVersion = function getVersion() {
-  return getPlatformName() === 'n' ? plus.runtime.version : '';
-};
-
-var getChannel = function getChannel() {
-  var platformName = getPlatformName();
-  var channel = '';
-  if (platformName === 'n') {
-    channel = plus.runtime.channel;
-  }
-  return channel;
-};
-
-var getScene = function getScene(options) {
-  var platformName = getPlatformName();
-  var scene = '';
-  if (options) {
-    return options;
-  }
-  if (platformName === 'wx') {
-    scene = uni.getLaunchOptionsSync().scene;
-  }
-  return scene;
-};
-var First__Visit__Time__KEY = 'First__Visit__Time';
-var Last__Visit__Time__KEY = 'Last__Visit__Time';
-
-var getFirstVisitTime = function getFirstVisitTime() {
-  var timeStorge = uni.getStorageSync(First__Visit__Time__KEY);
-  var time = 0;
-  if (timeStorge) {
-    time = timeStorge;
-  } else {
-    time = getTime();
-    uni.setStorageSync(First__Visit__Time__KEY, time);
-    uni.removeStorageSync(Last__Visit__Time__KEY);
-  }
-  return time;
-};
-
-var getLastVisitTime = function getLastVisitTime() {
-  var timeStorge = uni.getStorageSync(Last__Visit__Time__KEY);
-  var time = 0;
-  if (timeStorge) {
-    time = timeStorge;
-  } else {
-    time = '';
-  }
-  uni.setStorageSync(Last__Visit__Time__KEY, getTime());
-  return time;
-};
-
-
-var PAGE_RESIDENCE_TIME = '__page__residence__time';
-var First_Page_residence_time = 0;
-var Last_Page_residence_time = 0;
-
-
-var setPageResidenceTime = function setPageResidenceTime() {
-  First_Page_residence_time = getTime();
-  if (getPlatformName() === 'n') {
-    uni.setStorageSync(PAGE_RESIDENCE_TIME, getTime());
-  }
-  return First_Page_residence_time;
-};
-
-var getPageResidenceTime = function getPageResidenceTime() {
-  Last_Page_residence_time = getTime();
-  if (getPlatformName() === 'n') {
-    First_Page_residence_time = uni.getStorageSync(PAGE_RESIDENCE_TIME);
-  }
-  return Last_Page_residence_time - First_Page_residence_time;
-};
-var TOTAL__VISIT__COUNT = 'Total__Visit__Count';
-var getTotalVisitCount = function getTotalVisitCount() {
-  var timeStorge = uni.getStorageSync(TOTAL__VISIT__COUNT);
-  var count = 1;
-  if (timeStorge) {
-    count = timeStorge;
-    count++;
-  }
-  uni.setStorageSync(TOTAL__VISIT__COUNT, count);
-  return count;
-};
-
-var GetEncodeURIComponentOptions = function GetEncodeURIComponentOptions(statData) {
-  var data = {};
-  for (var prop in statData) {
-    data[prop] = encodeURIComponent(statData[prop]);
-  }
-  return data;
-};
-
-var Set__First__Time = 0;
-var Set__Last__Time = 0;
-
-var getFirstTime = function getFirstTime() {
-  var time = new Date().getTime();
-  Set__First__Time = time;
-  Set__Last__Time = 0;
-  return time;
-};
-
-
-var getLastTime = function getLastTime() {
-  var time = new Date().getTime();
-  Set__Last__Time = time;
-  return time;
-};
-
-
-var getResidenceTime = function getResidenceTime(type) {
-  var residenceTime = 0;
-  if (Set__First__Time !== 0) {
-    residenceTime = Set__Last__Time - Set__First__Time;
-  }
-
-  residenceTime = parseInt(residenceTime / 1000);
-  residenceTime = residenceTime < 1 ? 1 : residenceTime;
-  if (type === 'app') {
-    var overtime = residenceTime > APP_PVER_TIME ? true : false;
-    return {
-      residenceTime: residenceTime,
-      overtime: overtime };
-
-  }
-  if (type === 'page') {
-    var _overtime = residenceTime > PAGE_PVER_TIME ? true : false;
-    return {
-      residenceTime: residenceTime,
-      overtime: _overtime };
-
-  }
-
-  return {
-    residenceTime: residenceTime };
-
-
-};
-
-var getRoute = function getRoute() {
-  var pages = getCurrentPages();
-  var page = pages[pages.length - 1];
-  var _self = page.$vm;
-
-  if (getPlatformName() === 'bd') {
-    return _self.$mp && _self.$mp.page.is;
-  } else {
-    return _self.$scope && _self.$scope.route || _self.$mp && _self.$mp.page.route;
-  }
-};
-
-var getPageRoute = function getPageRoute(self) {
-  var pages = getCurrentPages();
-  var page = pages[pages.length - 1];
-  var _self = page.$vm;
-  var query = self._query;
-  var str = query && JSON.stringify(query) !== '{}' ? '?' + JSON.stringify(query) : '';
-  // clear
-  self._query = '';
-  if (getPlatformName() === 'bd') {
-    return _self.$mp && _self.$mp.page.is + str;
-  } else {
-    return _self.$scope && _self.$scope.route + str || _self.$mp && _self.$mp.page.route + str;
-  }
-};
-
-var getPageTypes = function getPageTypes(self) {
-  if (self.mpType === 'page' || self.$mp && self.$mp.mpType === 'page' || self.$options.mpType === 'page') {
-    return true;
-  }
-  return false;
-};
-
-var calibration = function calibration(eventName, options) {
-  //  login 、 share 、pay_success 、pay_fail 、register 、title
-  if (!eventName) {
-    console.error("uni.report \u7F3A\u5C11 [eventName] \u53C2\u6570");
-    return true;
-  }
-  if (typeof eventName !== 'string') {
-    console.error("uni.report [eventName] \u53C2\u6570\u7C7B\u578B\u9519\u8BEF,\u53EA\u80FD\u4E3A String \u7C7B\u578B");
-    return true;
-  }
-  if (eventName.length > 255) {
-    console.error("uni.report [eventName] \u53C2\u6570\u957F\u5EA6\u4E0D\u80FD\u5927\u4E8E 255");
-    return true;
-  }
-
-  if (typeof options !== 'string' && typeof options !== 'object') {
-    console.error("uni.report [options] \u53C2\u6570\u7C7B\u578B\u9519\u8BEF,\u53EA\u80FD\u4E3A String \u6216 Object \u7C7B\u578B");
-    return true;
-  }
-
-  if (typeof options === 'string' && options.length > 255) {
-    console.error("uni.report [options] \u53C2\u6570\u957F\u5EA6\u4E0D\u80FD\u5927\u4E8E 255");
-    return true;
-  }
-
-  if (eventName === 'title' && typeof options !== 'string') {
-    console.error('uni.report [eventName] 参数为 title 时，[options] 参数只能为 String 类型');
-    return true;
-  }
-};
-
-var PagesJson = __webpack_require__(/*! uni-pages?{"type":"style"} */ 7).default;
-var statConfig = __webpack_require__(/*! uni-stat-config */ 8).default || __webpack_require__(/*! uni-stat-config */ 8);
-
-var resultOptions = uni.getSystemInfoSync();var
-
-Util = /*#__PURE__*/function () {
-  function Util() {_classCallCheck(this, Util);
-    this.self = '';
-    this._retry = 0;
-    this._platform = '';
-    this._query = {};
-    this._navigationBarTitle = {
-      config: '',
-      page: '',
-      report: '',
-      lt: '' };
-
-    this._operatingTime = 0;
-    this._reportingRequestData = {
-      '1': [],
-      '11': [] };
-
-    this.__prevent_triggering = false;
-
-    this.__licationHide = false;
-    this.__licationShow = false;
-    this._lastPageRoute = '';
-    this.statData = {
-      uuid: getUuid(),
-      ut: getPlatformName(),
-      mpn: getPackName(),
-      ak: statConfig.appid,
-      usv: STAT_VERSION,
-      v: getVersion(),
-      ch: getChannel(),
-      cn: '',
-      pn: '',
-      ct: '',
-      t: getTime(),
-      tt: '',
-      p: resultOptions.platform === 'android' ? 'a' : 'i',
-      brand: resultOptions.brand || '',
-      md: resultOptions.model,
-      sv: resultOptions.system.replace(/(Android|iOS)\s/, ''),
-      mpsdk: resultOptions.SDKVersion || '',
-      mpv: resultOptions.version || '',
-      lang: resultOptions.language,
-      pr: resultOptions.pixelRatio,
-      ww: resultOptions.windowWidth,
-      wh: resultOptions.windowHeight,
-      sw: resultOptions.screenWidth,
-      sh: resultOptions.screenHeight };
-
-
-  }_createClass(Util, [{ key: "_applicationShow", value: function _applicationShow()
-
-    {
-      if (this.__licationHide) {
-        getLastTime();
-        var time = getResidenceTime('app');
-        if (time.overtime) {
-          var options = {
-            path: this._lastPageRoute,
-            scene: this.statData.sc };
-
-          this._sendReportRequest(options);
-        }
-        this.__licationHide = false;
-      }
-    } }, { key: "_applicationHide", value: function _applicationHide(
-
-    self, type) {
-
-      this.__licationHide = true;
-      getLastTime();
-      var time = getResidenceTime();
-      getFirstTime();
-      var route = getPageRoute(this);
-      this._sendHideRequest({
-        urlref: route,
-        urlref_ts: time.residenceTime },
-      type);
-    } }, { key: "_pageShow", value: function _pageShow()
-
-    {
-      var route = getPageRoute(this);
-      var routepath = getRoute();
-      this._navigationBarTitle.config = PagesJson &&
-      PagesJson.pages[routepath] &&
-      PagesJson.pages[routepath].titleNView &&
-      PagesJson.pages[routepath].titleNView.titleText ||
-      PagesJson &&
-      PagesJson.pages[routepath] &&
-      PagesJson.pages[routepath].navigationBarTitleText || '';
-
-      if (this.__licationShow) {
-        getFirstTime();
-        this.__licationShow = false;
-        // console.log('这是 onLauch 之后执行的第一次 pageShow ，为下次记录时间做准备');
-        this._lastPageRoute = route;
-        return;
-      }
-
-      getLastTime();
-      this._lastPageRoute = route;
-      var time = getResidenceTime('page');
-      if (time.overtime) {
-        var options = {
-          path: this._lastPageRoute,
-          scene: this.statData.sc };
-
-        this._sendReportRequest(options);
-      }
-      getFirstTime();
-    } }, { key: "_pageHide", value: function _pageHide()
-
-    {
-      if (!this.__licationHide) {
-        getLastTime();
-        var time = getResidenceTime('page');
-        this._sendPageRequest({
-          url: this._lastPageRoute,
-          urlref: this._lastPageRoute,
-          urlref_ts: time.residenceTime });
-
-        this._navigationBarTitle = {
-          config: '',
-          page: '',
-          report: '',
-          lt: '' };
-
-        return;
-      }
-    } }, { key: "_login", value: function _login()
-
-    {
-      this._sendEventRequest({
-        key: 'login' },
-      0);
-    } }, { key: "_share", value: function _share()
-
-    {
-      this._sendEventRequest({
-        key: 'share' },
-      0);
-    } }, { key: "_payment", value: function _payment(
-    key) {
-      this._sendEventRequest({
-        key: key },
-      0);
-    } }, { key: "_sendReportRequest", value: function _sendReportRequest(
-    options) {
-
-      this._navigationBarTitle.lt = '1';
-      var query = options.query && JSON.stringify(options.query) !== '{}' ? '?' + JSON.stringify(options.query) : '';
-      this.statData.lt = '1';
-      this.statData.url = options.path + query || '';
-      this.statData.t = getTime();
-      this.statData.sc = getScene(options.scene);
-      this.statData.fvts = getFirstVisitTime();
-      this.statData.lvts = getLastVisitTime();
-      this.statData.tvc = getTotalVisitCount();
-      if (getPlatformName() === 'n') {
-        this.getProperty();
-      } else {
-        this.getNetworkInfo();
-      }
-    } }, { key: "_sendPageRequest", value: function _sendPageRequest(
-
-    opt) {var
-
-      url =
-
-
-      opt.url,urlref = opt.urlref,urlref_ts = opt.urlref_ts;
-      this._navigationBarTitle.lt = '11';
-      var options = {
-        ak: this.statData.ak,
-        uuid: this.statData.uuid,
-        lt: '11',
-        ut: this.statData.ut,
-        url: url,
-        tt: this.statData.tt,
-        urlref: urlref,
-        urlref_ts: urlref_ts,
-        ch: this.statData.ch,
-        usv: this.statData.usv,
-        t: getTime(),
-        p: this.statData.p };
-
-      this.request(options);
-    } }, { key: "_sendHideRequest", value: function _sendHideRequest(
-
-    opt, type) {var
-
-      urlref =
-
-      opt.urlref,urlref_ts = opt.urlref_ts;
-      var options = {
-        ak: this.statData.ak,
-        uuid: this.statData.uuid,
-        lt: '3',
-        ut: this.statData.ut,
-        urlref: urlref,
-        urlref_ts: urlref_ts,
-        ch: this.statData.ch,
-        usv: this.statData.usv,
-        t: getTime(),
-        p: this.statData.p };
-
-      this.request(options, type);
-    } }, { key: "_sendEventRequest", value: function _sendEventRequest()
-
-
-
-    {var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},_ref$key = _ref.key,key = _ref$key === void 0 ? '' : _ref$key,_ref$value = _ref.value,value = _ref$value === void 0 ? "" : _ref$value;
-      var route = this._lastPageRoute;
-      var options = {
-        ak: this.statData.ak,
-        uuid: this.statData.uuid,
-        lt: '21',
-        ut: this.statData.ut,
-        url: route,
-        ch: this.statData.ch,
-        e_n: key,
-        e_v: typeof value === 'object' ? JSON.stringify(value) : value.toString(),
-        usv: this.statData.usv,
-        t: getTime(),
-        p: this.statData.p };
-
-      this.request(options);
-    } }, { key: "getNetworkInfo", value: function getNetworkInfo()
-
-    {var _this = this;
-      uni.getNetworkType({
-        success: function success(result) {
-          _this.statData.net = result.networkType;
-          _this.getLocation();
-        } });
-
-    } }, { key: "getProperty", value: function getProperty()
-
-    {var _this2 = this;
-      plus.runtime.getProperty(plus.runtime.appid, function (wgtinfo) {
-        _this2.statData.v = wgtinfo.version || '';
-        _this2.getNetworkInfo();
-      });
-    } }, { key: "getLocation", value: function getLocation()
-
-    {var _this3 = this;
-      if (statConfig.getLocation) {
-        uni.getLocation({
-          type: 'wgs84',
-          geocode: true,
-          success: function success(result) {
-            if (result.address) {
-              _this3.statData.cn = result.address.country;
-              _this3.statData.pn = result.address.province;
-              _this3.statData.ct = result.address.city;
-            }
-
-            _this3.statData.lat = result.latitude;
-            _this3.statData.lng = result.longitude;
-            _this3.request(_this3.statData);
-          } });
-
-      } else {
-        this.statData.lat = 0;
-        this.statData.lng = 0;
-        this.request(this.statData);
-      }
-    } }, { key: "request", value: function request(
-
-    data, type) {var _this4 = this;
-      var time = getTime();
-      var title = this._navigationBarTitle;
-      data.ttn = title.page;
-      data.ttpj = title.config;
-      data.ttc = title.report;
-
-      var requestData = this._reportingRequestData;
-      if (getPlatformName() === 'n') {
-        requestData = uni.getStorageSync('__UNI__STAT__DATA') || {};
-      }
-      if (!requestData[data.lt]) {
-        requestData[data.lt] = [];
-      }
-      requestData[data.lt].push(data);
-
-      if (getPlatformName() === 'n') {
-        uni.setStorageSync('__UNI__STAT__DATA', requestData);
-      }
-      if (getPageResidenceTime() < OPERATING_TIME && !type) {
-        return;
-      }
-      var uniStatData = this._reportingRequestData;
-      if (getPlatformName() === 'n') {
-        uniStatData = uni.getStorageSync('__UNI__STAT__DATA');
-      }
-      // 时间超过，重新获取时间戳
-      setPageResidenceTime();
-      var firstArr = [];
-      var contentArr = [];
-      var lastArr = [];var _loop = function _loop(
-
-      i) {
-        var rd = uniStatData[i];
-        rd.forEach(function (elm) {
-          var newData = getSplicing(elm);
-          if (i === 0) {
-            firstArr.push(newData);
-          } else if (i === 3) {
-            lastArr.push(newData);
-          } else {
-            contentArr.push(newData);
-          }
-        });};for (var i in uniStatData) {_loop(i);
-      }
-
-      firstArr.push.apply(firstArr, contentArr.concat(lastArr));
-      var optionsData = {
-        usv: STAT_VERSION, //统计 SDK 版本号
-        t: time, //发送请求时的时间戮
-        requests: JSON.stringify(firstArr) };
-
-
-      this._reportingRequestData = {};
-      if (getPlatformName() === 'n') {
-        uni.removeStorageSync('__UNI__STAT__DATA');
-      }
-
-      if (data.ut === 'h5') {
-        this.imageRequest(optionsData);
-        return;
-      }
-
-      if (getPlatformName() === 'n' && this.statData.p === 'a') {
-        setTimeout(function () {
-          _this4._sendRequest(optionsData);
-        }, 200);
-        return;
-      }
-      this._sendRequest(optionsData);
-    } }, { key: "_sendRequest", value: function _sendRequest(
-    optionsData) {var _this5 = this;
-      uni.request({
-        url: STAT_URL,
-        method: 'POST',
-        // header: {
-        //   'content-type': 'application/json' // 默认值
-        // },
-        data: optionsData,
-        success: function success() {
-          // if (process.env.NODE_ENV === 'development') {
-          //   console.log('stat request success');
-          // }
-        },
-        fail: function fail(e) {
-          if (++_this5._retry < 3) {
-            setTimeout(function () {
-              _this5._sendRequest(optionsData);
-            }, 1000);
-          }
-        } });
-
-    }
-    /**
-       * h5 请求
-       */ }, { key: "imageRequest", value: function imageRequest(
-    data) {
-      var image = new Image();
-      var options = getSgin(GetEncodeURIComponentOptions(data)).options;
-      image.src = STAT_H5_URL + '?' + options;
-    } }, { key: "sendEvent", value: function sendEvent(
-
-    key, value) {
-      // 校验 type 参数
-      if (calibration(key, value)) return;
-
-      if (key === 'title') {
-        this._navigationBarTitle.report = value;
-        return;
-      }
-      this._sendEventRequest({
-        key: key,
-        value: typeof value === 'object' ? JSON.stringify(value) : value },
-      1);
-    } }]);return Util;}();var
-
-
-
-Stat = /*#__PURE__*/function (_Util) {_inherits(Stat, _Util);var _super = _createSuper(Stat);_createClass(Stat, null, [{ key: "getInstance", value: function getInstance()
-    {
-      if (!this.instance) {
-        this.instance = new Stat();
-      }
-      return this.instance;
-    } }]);
-  function Stat() {var _this6;_classCallCheck(this, Stat);
-    _this6 = _super.call(this);
-    _this6.instance = null;
-    // 注册拦截器
-    if (typeof uni.addInterceptor === 'function' && "development" !== 'development') {
-      _this6.addInterceptorInit();
-      _this6.interceptLogin();
-      _this6.interceptShare(true);
-      _this6.interceptRequestPayment();
-    }return _this6;
-  }_createClass(Stat, [{ key: "addInterceptorInit", value: function addInterceptorInit()
-
-    {
-      var self = this;
-      uni.addInterceptor('setNavigationBarTitle', {
-        invoke: function invoke(args) {
-          self._navigationBarTitle.page = args.title;
-        } });
-
-    } }, { key: "interceptLogin", value: function interceptLogin()
-
-    {
-      var self = this;
-      uni.addInterceptor('login', {
-        complete: function complete() {
-          self._login();
-        } });
-
-    } }, { key: "interceptShare", value: function interceptShare(
-
-    type) {
-      var self = this;
-      if (!type) {
-        self._share();
-        return;
-      }
-      uni.addInterceptor('share', {
-        success: function success() {
-          self._share();
-        },
-        fail: function fail() {
-          self._share();
-        } });
-
-    } }, { key: "interceptRequestPayment", value: function interceptRequestPayment()
-
-    {
-      var self = this;
-      uni.addInterceptor('requestPayment', {
-        success: function success() {
-          self._payment('pay_success');
-        },
-        fail: function fail() {
-          self._payment('pay_fail');
-        } });
-
-    } }, { key: "report", value: function report(
-
-    options, self) {
-      this.self = self;
-      // if (process.env.NODE_ENV === 'development') {
-      //   console.log('report init');
-      // }
-      setPageResidenceTime();
-      this.__licationShow = true;
-      this._sendReportRequest(options, true);
-    } }, { key: "load", value: function load(
-
-    options, self) {
-      if (!self.$scope && !self.$mp) {
-        var page = getCurrentPages();
-        self.$scope = page[page.length - 1];
-      }
-      this.self = self;
-      this._query = options;
-    } }, { key: "show", value: function show(
-
-    self) {
-      this.self = self;
-      if (getPageTypes(self)) {
-        this._pageShow(self);
-      } else {
-        this._applicationShow(self);
-      }
-    } }, { key: "ready", value: function ready(
-
-    self) {
-      // this.self = self;
-      // if (getPageTypes(self)) {
-      //   this._pageShow(self);
-      // }
-    } }, { key: "hide", value: function hide(
-    self) {
-      this.self = self;
-      if (getPageTypes(self)) {
-        this._pageHide(self);
-      } else {
-        this._applicationHide(self, true);
-      }
-    } }, { key: "error", value: function error(
-    em) {
-      if (this._platform === 'devtools') {
-        if (true) {
-          console.info('当前运行环境为开发者工具，不上报数据。');
-        }
-        // return;
-      }
-      var emVal = '';
-      if (!em.message) {
-        emVal = JSON.stringify(em);
-      } else {
-        emVal = em.stack;
-      }
-      var options = {
-        ak: this.statData.ak,
-        uuid: this.statData.uuid,
-        lt: '31',
-        ut: this.statData.ut,
-        ch: this.statData.ch,
-        mpsdk: this.statData.mpsdk,
-        mpv: this.statData.mpv,
-        v: this.statData.v,
-        em: emVal,
-        usv: this.statData.usv,
-        t: getTime(),
-        p: this.statData.p };
-
-      this.request(options);
-    } }]);return Stat;}(Util);
-
-
-var stat = Stat.getInstance();
-var isHide = false;
-var lifecycle = {
-  onLaunch: function onLaunch(options) {
-    stat.report(options, this);
-  },
-  onReady: function onReady() {
-    stat.ready(this);
-  },
-  onLoad: function onLoad(options) {
-    stat.load(options, this);
-    // 重写分享，获取分享上报事件
-    if (this.$scope && this.$scope.onShareAppMessage) {
-      var oldShareAppMessage = this.$scope.onShareAppMessage;
-      this.$scope.onShareAppMessage = function (options) {
-        stat.interceptShare(false);
-        return oldShareAppMessage.call(this, options);
-      };
-    }
-  },
-  onShow: function onShow() {
-    isHide = false;
-    stat.show(this);
-  },
-  onHide: function onHide() {
-    isHide = true;
-    stat.hide(this);
-  },
-  onUnload: function onUnload() {
-    if (isHide) {
-      isHide = false;
-      return;
-    }
-    stat.hide(this);
-  },
-  onError: function onError(e) {
-    stat.error(e);
-  } };
-
-
-function main() {
-  if (true) {
-    uni.report = function (type, options) {};
-  } else { var Vue; }
-}
-
-main();
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 1)["default"]))
-
-/***/ }),
-/* 6 */
-/*!******************************************************!*\
-  !*** ./node_modules/@dcloudio/uni-stat/package.json ***!
-  \******************************************************/
-/*! exports provided: _from, _id, _inBundle, _integrity, _location, _phantomChildren, _requested, _requiredBy, _resolved, _shasum, _spec, _where, author, bugs, bundleDependencies, deprecated, description, devDependencies, files, gitHead, homepage, license, main, name, repository, scripts, version, default */
-/***/ (function(module) {
-
-module.exports = {"_from":"@dcloudio/uni-stat@next","_id":"@dcloudio/uni-stat@2.0.0-261120200409001","_inBundle":false,"_integrity":"sha512-iM1vsCzUEg80lCM7rSAkh+28ahjS9zQgiGsEoHxawCD9s7rTFnSRIaOuc7WHeQt6EclGUUIrMccYHXsLsNAXZg==","_location":"/@dcloudio/uni-stat","_phantomChildren":{},"_requested":{"type":"tag","registry":true,"raw":"@dcloudio/uni-stat@next","name":"@dcloudio/uni-stat","escapedName":"@dcloudio%2funi-stat","scope":"@dcloudio","rawSpec":"next","saveSpec":null,"fetchSpec":"next"},"_requiredBy":["#USER","/","/@dcloudio/vue-cli-plugin-uni"],"_resolved":"https://registry.npmjs.org/@dcloudio/uni-stat/-/uni-stat-2.0.0-261120200409001.tgz","_shasum":"e9daeef120f133bf3d4ca0505f5b2abed0e874a7","_spec":"@dcloudio/uni-stat@next","_where":"/Users/guoshengqiang/Documents/dcloud-plugins/release/uniapp-cli","author":"","bugs":{"url":"https://github.com/dcloudio/uni-app/issues"},"bundleDependencies":false,"deprecated":false,"description":"","devDependencies":{"@babel/core":"^7.5.5","@babel/preset-env":"^7.5.5","eslint":"^6.1.0","rollup":"^1.19.3","rollup-plugin-babel":"^4.3.3","rollup-plugin-clear":"^2.0.7","rollup-plugin-commonjs":"^10.0.2","rollup-plugin-copy":"^3.1.0","rollup-plugin-eslint":"^7.0.0","rollup-plugin-json":"^4.0.0","rollup-plugin-node-resolve":"^5.2.0","rollup-plugin-replace":"^2.2.0","rollup-plugin-uglify":"^6.0.2"},"files":["dist","package.json","LICENSE"],"gitHead":"ff0877f516c1cc986cf2d7eae2bf5030c58050f9","homepage":"https://github.com/dcloudio/uni-app#readme","license":"Apache-2.0","main":"dist/index.js","name":"@dcloudio/uni-stat","repository":{"type":"git","url":"git+https://github.com/dcloudio/uni-app.git","directory":"packages/uni-stat"},"scripts":{"build":"NODE_ENV=production rollup -c rollup.config.js","dev":"NODE_ENV=development rollup -w -c rollup.config.js"},"version":"2.0.0-261120200409001"};
-
-/***/ }),
-/* 7 */
-/*!******************************************!*\
-  !*** D:/OOH/pages.json?{"type":"style"} ***!
-  \******************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var _default = { "pages": { "pages/login/login": { "navigationStyle": "default", "navigationBarTitleText": "登录" }, "pages/index/index": { "navigationStyle": "default", "navigationBarTitleText": "我的任务" }, "pages/myList/myList": { "navigationStyle": "default", "navigationBarTitleText": "我的清单" }, "pages/speed/speed": { "navigationStyle": "default", "navigationBarTitleText": "任务进度" }, "pages/more/more": { "navigationStyle": "default", "navigationBarTitleText": "更多" }, "pages/statement/statement": { "navigationStyle": "default", "navigationBarTitleText": "知识产权申明" }, "pages/about/about": { "navigationStyle": "default", "navigationBarTitleText": "关于我们" }, "pages/location/location": { "navigationStyle": "default", "navigationBarTitleText": "定位" }, "pages/details/details": { "navigationStyle": "default", "navigationBarTitleText": "任务详情" }, "pages/photoSubmission/photoSubmission": { "navigationStyle": "default", "navigationBarTitleText": "照片提交" }, "pages/pictureDet/pictureDet": { "navigationStyle": "default", "navigationBarTitleText": "查看图片" } }, "globalStyle": { "navigationBarTextStyle": "black", "navigationBarTitleText": "户外监控", "navigationBarBackgroundColor": "#f8f8f8", "backgroundColor": "#f8f8f8", "backgroundColorTop": "#F4F5F6", "backgroundColorBottom": "#F4F5F6" } };exports.default = _default;
-
-/***/ }),
+/* 5 */,
+/* 6 */,
+/* 7 */,
 /* 8 */
-/*!*****************************************!*\
-  !*** D:/OOH/pages.json?{"type":"stat"} ***!
-  \*****************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var _default = { "appid": "__UNI__21D436F" };exports.default = _default;
-
-/***/ }),
-/* 9 */,
-/* 10 */,
-/* 11 */,
-/* 12 */
-/*!*******************************!*\
-  !*** D:/OOH/common/config.js ***!
-  \*******************************/
+/*!*******************************************!*\
+  !*** D:/project/git/OOH/common/config.js ***!
+  \*******************************************/
 /*! no static exports found */
 /***/ (function(module, exports) {
 
@@ -8566,21 +7657,21 @@ var config = {
 module.exports = config;
 
 /***/ }),
-/* 13 */
-/*!*********************************!*\
-  !*** D:/OOH/util/request_UT.js ***!
-  \*********************************/
+/* 9 */
+/*!*********************************************!*\
+  !*** D:/project/git/OOH/util/request_UT.js ***!
+  \*********************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(uni) {Object.defineProperty(exports, "__esModule", { value: true });exports.postFetch = exports.getFetch = void 0;var _regenerator = _interopRequireDefault(__webpack_require__(/*! ./node_modules/@vue/babel-preset-app/node_modules/@babel/runtime/regenerator */ 14));var _vue = _interopRequireDefault(__webpack_require__(/*! vue */ 2));
-var _vuex = _interopRequireDefault(__webpack_require__(/*! vuex */ 17));
-var _axios = _interopRequireDefault(__webpack_require__(/*! axios */ 18));
-var _qs = _interopRequireDefault(__webpack_require__(/*! qs */ 46));function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {try {var info = gen[key](arg);var value = info.value;} catch (error) {reject(error);return;}if (info.done) {resolve(value);} else {Promise.resolve(value).then(_next, _throw);}}function _asyncToGenerator(fn) {return function () {var self = this,args = arguments;return new Promise(function (resolve, reject) {var gen = fn.apply(self, args);function _next(value) {asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);}function _throw(err) {asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);}_next(undefined);});};}
-var config = __webpack_require__(/*! @/common/config.js */ 12);
-var utils = __webpack_require__(/*! @/util/util.js */ 51);
-var md5 = __webpack_require__(/*! @/util/md5.js */ 52);
+/* WEBPACK VAR INJECTION */(function(uni) {Object.defineProperty(exports, "__esModule", { value: true });exports.postFetch = exports.getFetch = void 0;var _regenerator = _interopRequireDefault(__webpack_require__(/*! ./node_modules/@vue/babel-preset-app/node_modules/@babel/runtime/regenerator */ 10));var _vue = _interopRequireDefault(__webpack_require__(/*! vue */ 2));
+var _vuex = _interopRequireDefault(__webpack_require__(/*! vuex */ 13));
+var _axios = _interopRequireDefault(__webpack_require__(/*! axios */ 14));
+var _qs = _interopRequireDefault(__webpack_require__(/*! qs */ 42));function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {try {var info = gen[key](arg);var value = info.value;} catch (error) {reject(error);return;}if (info.done) {resolve(value);} else {Promise.resolve(value).then(_next, _throw);}}function _asyncToGenerator(fn) {return function () {var self = this,args = arguments;return new Promise(function (resolve, reject) {var gen = fn.apply(self, args);function _next(value) {asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);}function _throw(err) {asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);}_next(undefined);});};}
+var config = __webpack_require__(/*! @/common/config.js */ 8);
+var utils = __webpack_require__(/*! @/util/util.js */ 47);
+var md5 = __webpack_require__(/*! @/util/md5.js */ 48);
 
 var getFetch = /*#__PURE__*/function () {var _ref = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee(method, parm, callback, inparm) {var ts, _uid, sign, id, data, header, res;return _regenerator.default.wrap(function _callee$(_context) {while (1) {switch (_context.prev = _context.next) {case 0:_context.prev = 0;
 
@@ -8681,17 +7772,17 @@ var postFetch = /*#__PURE__*/function () {var _ref3 = _asyncToGenerator( /*#__PU
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 1)["default"]))
 
 /***/ }),
-/* 14 */
+/* 10 */
 /*!*********************************************************************************************!*\
   !*** ./node_modules/@vue/babel-preset-app/node_modules/@babel/runtime/regenerator/index.js ***!
   \*********************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(/*! regenerator-runtime */ 15);
+module.exports = __webpack_require__(/*! regenerator-runtime */ 11);
 
 /***/ }),
-/* 15 */
+/* 11 */
 /*!************************************************************!*\
   !*** ./node_modules/regenerator-runtime/runtime-module.js ***!
   \************************************************************/
@@ -8722,7 +7813,7 @@ var oldRuntime = hadRuntime && g.regeneratorRuntime;
 // Force reevalutation of runtime.js.
 g.regeneratorRuntime = undefined;
 
-module.exports = __webpack_require__(/*! ./runtime */ 16);
+module.exports = __webpack_require__(/*! ./runtime */ 12);
 
 if (hadRuntime) {
   // Restore the original runtime.
@@ -8738,7 +7829,7 @@ if (hadRuntime) {
 
 
 /***/ }),
-/* 16 */
+/* 12 */
 /*!*****************************************************!*\
   !*** ./node_modules/regenerator-runtime/runtime.js ***!
   \*****************************************************/
@@ -9469,7 +8560,7 @@ if (hadRuntime) {
 
 
 /***/ }),
-/* 17 */
+/* 13 */
 /*!********************************************!*\
   !*** ./node_modules/vuex/dist/vuex.esm.js ***!
   \********************************************/
@@ -10419,31 +9510,31 @@ var index_esm = {
 
 
 /***/ }),
-/* 18 */
-/*!********************************************************!*\
-  !*** D:/OOH/node_modules/_axios@0.19.2@axios/index.js ***!
-  \********************************************************/
+/* 14 */
+/*!******************************************************!*\
+  !*** D:/project/git/OOH/node_modules/axios/index.js ***!
+  \******************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(/*! ./lib/axios */ 19);
+module.exports = __webpack_require__(/*! ./lib/axios */ 15);
 
 /***/ }),
-/* 19 */
-/*!************************************************************!*\
-  !*** D:/OOH/node_modules/_axios@0.19.2@axios/lib/axios.js ***!
-  \************************************************************/
+/* 15 */
+/*!**********************************************************!*\
+  !*** D:/project/git/OOH/node_modules/axios/lib/axios.js ***!
+  \**********************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var utils = __webpack_require__(/*! ./utils */ 20);
-var bind = __webpack_require__(/*! ./helpers/bind */ 21);
-var Axios = __webpack_require__(/*! ./core/Axios */ 22);
-var mergeConfig = __webpack_require__(/*! ./core/mergeConfig */ 42);
-var defaults = __webpack_require__(/*! ./defaults */ 28);
+var utils = __webpack_require__(/*! ./utils */ 16);
+var bind = __webpack_require__(/*! ./helpers/bind */ 17);
+var Axios = __webpack_require__(/*! ./core/Axios */ 18);
+var mergeConfig = __webpack_require__(/*! ./core/mergeConfig */ 38);
+var defaults = __webpack_require__(/*! ./defaults */ 24);
 
 /**
                                        * Create an instance of Axios
@@ -10476,15 +9567,15 @@ axios.create = function create(instanceConfig) {
 };
 
 // Expose Cancel & CancelToken
-axios.Cancel = __webpack_require__(/*! ./cancel/Cancel */ 43);
-axios.CancelToken = __webpack_require__(/*! ./cancel/CancelToken */ 44);
-axios.isCancel = __webpack_require__(/*! ./cancel/isCancel */ 27);
+axios.Cancel = __webpack_require__(/*! ./cancel/Cancel */ 39);
+axios.CancelToken = __webpack_require__(/*! ./cancel/CancelToken */ 40);
+axios.isCancel = __webpack_require__(/*! ./cancel/isCancel */ 23);
 
 // Expose all/spread
 axios.all = function all(promises) {
   return Promise.all(promises);
 };
-axios.spread = __webpack_require__(/*! ./helpers/spread */ 45);
+axios.spread = __webpack_require__(/*! ./helpers/spread */ 41);
 
 module.exports = axios;
 
@@ -10492,17 +9583,17 @@ module.exports = axios;
 module.exports.default = axios;
 
 /***/ }),
-/* 20 */
-/*!************************************************************!*\
-  !*** D:/OOH/node_modules/_axios@0.19.2@axios/lib/utils.js ***!
-  \************************************************************/
+/* 16 */
+/*!**********************************************************!*\
+  !*** D:/project/git/OOH/node_modules/axios/lib/utils.js ***!
+  \**********************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var bind = __webpack_require__(/*! ./helpers/bind */ 21);
+var bind = __webpack_require__(/*! ./helpers/bind */ 17);
 
 /*global toString:true*/
 
@@ -10845,10 +9936,10 @@ module.exports = {
   trim: trim };
 
 /***/ }),
-/* 21 */
-/*!*******************************************************************!*\
-  !*** D:/OOH/node_modules/_axios@0.19.2@axios/lib/helpers/bind.js ***!
-  \*******************************************************************/
+/* 17 */
+/*!*****************************************************************!*\
+  !*** D:/project/git/OOH/node_modules/axios/lib/helpers/bind.js ***!
+  \*****************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -10866,21 +9957,21 @@ module.exports = function bind(fn, thisArg) {
 };
 
 /***/ }),
-/* 22 */
-/*!*****************************************************************!*\
-  !*** D:/OOH/node_modules/_axios@0.19.2@axios/lib/core/Axios.js ***!
-  \*****************************************************************/
+/* 18 */
+/*!***************************************************************!*\
+  !*** D:/project/git/OOH/node_modules/axios/lib/core/Axios.js ***!
+  \***************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var utils = __webpack_require__(/*! ./../utils */ 20);
-var buildURL = __webpack_require__(/*! ../helpers/buildURL */ 23);
-var InterceptorManager = __webpack_require__(/*! ./InterceptorManager */ 24);
-var dispatchRequest = __webpack_require__(/*! ./dispatchRequest */ 25);
-var mergeConfig = __webpack_require__(/*! ./mergeConfig */ 42);
+var utils = __webpack_require__(/*! ./../utils */ 16);
+var buildURL = __webpack_require__(/*! ../helpers/buildURL */ 19);
+var InterceptorManager = __webpack_require__(/*! ./InterceptorManager */ 20);
+var dispatchRequest = __webpack_require__(/*! ./dispatchRequest */ 21);
+var mergeConfig = __webpack_require__(/*! ./mergeConfig */ 38);
 
 /**
                                              * Create a new instance of Axios
@@ -10970,17 +10061,17 @@ utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
 module.exports = Axios;
 
 /***/ }),
-/* 23 */
-/*!***********************************************************************!*\
-  !*** D:/OOH/node_modules/_axios@0.19.2@axios/lib/helpers/buildURL.js ***!
-  \***********************************************************************/
+/* 19 */
+/*!*********************************************************************!*\
+  !*** D:/project/git/OOH/node_modules/axios/lib/helpers/buildURL.js ***!
+  \*********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var utils = __webpack_require__(/*! ./../utils */ 20);
+var utils = __webpack_require__(/*! ./../utils */ 16);
 
 function encode(val) {
   return encodeURIComponent(val).
@@ -11051,17 +10142,17 @@ module.exports = function buildURL(url, params, paramsSerializer) {
 };
 
 /***/ }),
-/* 24 */
-/*!******************************************************************************!*\
-  !*** D:/OOH/node_modules/_axios@0.19.2@axios/lib/core/InterceptorManager.js ***!
-  \******************************************************************************/
+/* 20 */
+/*!****************************************************************************!*\
+  !*** D:/project/git/OOH/node_modules/axios/lib/core/InterceptorManager.js ***!
+  \****************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var utils = __webpack_require__(/*! ./../utils */ 20);
+var utils = __webpack_require__(/*! ./../utils */ 16);
 
 function InterceptorManager() {
   this.handlers = [];
@@ -11113,20 +10204,20 @@ InterceptorManager.prototype.forEach = function forEach(fn) {
 module.exports = InterceptorManager;
 
 /***/ }),
-/* 25 */
-/*!***************************************************************************!*\
-  !*** D:/OOH/node_modules/_axios@0.19.2@axios/lib/core/dispatchRequest.js ***!
-  \***************************************************************************/
+/* 21 */
+/*!*************************************************************************!*\
+  !*** D:/project/git/OOH/node_modules/axios/lib/core/dispatchRequest.js ***!
+  \*************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var utils = __webpack_require__(/*! ./../utils */ 20);
-var transformData = __webpack_require__(/*! ./transformData */ 26);
-var isCancel = __webpack_require__(/*! ../cancel/isCancel */ 27);
-var defaults = __webpack_require__(/*! ../defaults */ 28);
+var utils = __webpack_require__(/*! ./../utils */ 16);
+var transformData = __webpack_require__(/*! ./transformData */ 22);
+var isCancel = __webpack_require__(/*! ../cancel/isCancel */ 23);
+var defaults = __webpack_require__(/*! ../defaults */ 24);
 
 /**
                                         * Throws a `Cancel` if cancellation has been requested.
@@ -11202,17 +10293,17 @@ module.exports = function dispatchRequest(config) {
 };
 
 /***/ }),
-/* 26 */
-/*!*************************************************************************!*\
-  !*** D:/OOH/node_modules/_axios@0.19.2@axios/lib/core/transformData.js ***!
-  \*************************************************************************/
+/* 22 */
+/*!***********************************************************************!*\
+  !*** D:/project/git/OOH/node_modules/axios/lib/core/transformData.js ***!
+  \***********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var utils = __webpack_require__(/*! ./../utils */ 20);
+var utils = __webpack_require__(/*! ./../utils */ 16);
 
 /**
                                     * Transform the data for a request or a response
@@ -11232,10 +10323,10 @@ module.exports = function transformData(data, headers, fns) {
 };
 
 /***/ }),
-/* 27 */
-/*!**********************************************************************!*\
-  !*** D:/OOH/node_modules/_axios@0.19.2@axios/lib/cancel/isCancel.js ***!
-  \**********************************************************************/
+/* 23 */
+/*!********************************************************************!*\
+  !*** D:/project/git/OOH/node_modules/axios/lib/cancel/isCancel.js ***!
+  \********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -11247,18 +10338,18 @@ module.exports = function isCancel(value) {
 };
 
 /***/ }),
-/* 28 */
-/*!***************************************************************!*\
-  !*** D:/OOH/node_modules/_axios@0.19.2@axios/lib/defaults.js ***!
-  \***************************************************************/
+/* 24 */
+/*!*************************************************************!*\
+  !*** D:/project/git/OOH/node_modules/axios/lib/defaults.js ***!
+  \*************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(process) {
 
-var utils = __webpack_require__(/*! ./utils */ 20);
-var normalizeHeaderName = __webpack_require__(/*! ./helpers/normalizeHeaderName */ 31);
+var utils = __webpack_require__(/*! ./utils */ 16);
+var normalizeHeaderName = __webpack_require__(/*! ./helpers/normalizeHeaderName */ 27);
 
 var DEFAULT_CONTENT_TYPE = {
   'Content-Type': 'application/x-www-form-urlencoded' };
@@ -11274,10 +10365,10 @@ function getDefaultAdapter() {
   var adapter;
   if (typeof XMLHttpRequest !== 'undefined') {
     // For browsers use XHR adapter
-    adapter = __webpack_require__(/*! ./adapters/xhr */ 32);
+    adapter = __webpack_require__(/*! ./adapters/xhr */ 28);
   } else if (typeof process !== 'undefined' && Object.prototype.toString.call(process) === '[object process]') {
     // For node use HTTP adapter
-    adapter = __webpack_require__(/*! ./adapters/http */ 32);
+    adapter = __webpack_require__(/*! ./adapters/http */ 28);
   }
   return adapter;
 }
@@ -11352,10 +10443,10 @@ utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
 });
 
 module.exports = defaults;
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/node-libs-browser/mock/process.js */ 29)))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../../../下载软件/HBuilderX.2.7.9.20200527/HBuilderX/plugins/uniapp-cli/node_modules/node-libs-browser/mock/process.js */ 25)))
 
 /***/ }),
-/* 29 */
+/* 25 */
 /*!********************************************************!*\
   !*** ./node_modules/node-libs-browser/mock/process.js ***!
   \********************************************************/
@@ -11386,7 +10477,7 @@ exports.binding = function (name) {
     var path;
     exports.cwd = function () { return cwd };
     exports.chdir = function (dir) {
-        if (!path) path = __webpack_require__(/*! path */ 30);
+        if (!path) path = __webpack_require__(/*! path */ 26);
         cwd = path.resolve(dir, cwd);
     };
 })();
@@ -11399,7 +10490,7 @@ exports.features = {};
 
 
 /***/ }),
-/* 30 */
+/* 26 */
 /*!***********************************************!*\
   !*** ./node_modules/path-browserify/index.js ***!
   \***********************************************/
@@ -11709,20 +10800,20 @@ var substr = 'ab'.substr(-1) === 'b'
     }
 ;
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../node-libs-browser/mock/process.js */ 29)))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../node-libs-browser/mock/process.js */ 25)))
 
 /***/ }),
-/* 31 */
-/*!**********************************************************************************!*\
-  !*** D:/OOH/node_modules/_axios@0.19.2@axios/lib/helpers/normalizeHeaderName.js ***!
-  \**********************************************************************************/
+/* 27 */
+/*!********************************************************************************!*\
+  !*** D:/project/git/OOH/node_modules/axios/lib/helpers/normalizeHeaderName.js ***!
+  \********************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var utils = __webpack_require__(/*! ../utils */ 20);
+var utils = __webpack_require__(/*! ../utils */ 16);
 
 module.exports = function normalizeHeaderName(headers, normalizedName) {
   utils.forEach(headers, function processHeader(value, name) {
@@ -11734,23 +10825,23 @@ module.exports = function normalizeHeaderName(headers, normalizedName) {
 };
 
 /***/ }),
-/* 32 */
-/*!*******************************************************************!*\
-  !*** D:/OOH/node_modules/_axios@0.19.2@axios/lib/adapters/xhr.js ***!
-  \*******************************************************************/
+/* 28 */
+/*!*****************************************************************!*\
+  !*** D:/project/git/OOH/node_modules/axios/lib/adapters/xhr.js ***!
+  \*****************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var utils = __webpack_require__(/*! ./../utils */ 20);
-var settle = __webpack_require__(/*! ./../core/settle */ 33);
-var buildURL = __webpack_require__(/*! ./../helpers/buildURL */ 23);
-var buildFullPath = __webpack_require__(/*! ../core/buildFullPath */ 36);
-var parseHeaders = __webpack_require__(/*! ./../helpers/parseHeaders */ 39);
-var isURLSameOrigin = __webpack_require__(/*! ./../helpers/isURLSameOrigin */ 40);
-var createError = __webpack_require__(/*! ../core/createError */ 34);
+var utils = __webpack_require__(/*! ./../utils */ 16);
+var settle = __webpack_require__(/*! ./../core/settle */ 29);
+var buildURL = __webpack_require__(/*! ./../helpers/buildURL */ 19);
+var buildFullPath = __webpack_require__(/*! ../core/buildFullPath */ 32);
+var parseHeaders = __webpack_require__(/*! ./../helpers/parseHeaders */ 35);
+var isURLSameOrigin = __webpack_require__(/*! ./../helpers/isURLSameOrigin */ 36);
+var createError = __webpack_require__(/*! ../core/createError */ 30);
 
 module.exports = function xhrAdapter(config) {
   return new Promise(function dispatchXhrRequest(resolve, reject) {
@@ -11847,7 +10938,7 @@ module.exports = function xhrAdapter(config) {
     // This is only done if running in a standard browser environment.
     // Specifically not if we're in a web worker, or react-native.
     if (utils.isStandardBrowserEnv()) {
-      var cookies = __webpack_require__(/*! ./../helpers/cookies */ 41);
+      var cookies = __webpack_require__(/*! ./../helpers/cookies */ 37);
 
       // Add xsrf header
       var xsrfValue = (config.withCredentials || isURLSameOrigin(fullPath)) && config.xsrfCookieName ?
@@ -11924,17 +11015,17 @@ module.exports = function xhrAdapter(config) {
 };
 
 /***/ }),
-/* 33 */
-/*!******************************************************************!*\
-  !*** D:/OOH/node_modules/_axios@0.19.2@axios/lib/core/settle.js ***!
-  \******************************************************************/
+/* 29 */
+/*!****************************************************************!*\
+  !*** D:/project/git/OOH/node_modules/axios/lib/core/settle.js ***!
+  \****************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var createError = __webpack_require__(/*! ./createError */ 34);
+var createError = __webpack_require__(/*! ./createError */ 30);
 
 /**
                                              * Resolve or reject a Promise based on response status.
@@ -11959,17 +11050,17 @@ module.exports = function settle(resolve, reject, response) {
 };
 
 /***/ }),
-/* 34 */
-/*!***********************************************************************!*\
-  !*** D:/OOH/node_modules/_axios@0.19.2@axios/lib/core/createError.js ***!
-  \***********************************************************************/
+/* 30 */
+/*!*********************************************************************!*\
+  !*** D:/project/git/OOH/node_modules/axios/lib/core/createError.js ***!
+  \*********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var enhanceError = __webpack_require__(/*! ./enhanceError */ 35);
+var enhanceError = __webpack_require__(/*! ./enhanceError */ 31);
 
 /**
                                                * Create an Error with the specified message, config, error code, request and response.
@@ -11987,10 +11078,10 @@ module.exports = function createError(message, config, code, request, response) 
 };
 
 /***/ }),
-/* 35 */
-/*!************************************************************************!*\
-  !*** D:/OOH/node_modules/_axios@0.19.2@axios/lib/core/enhanceError.js ***!
-  \************************************************************************/
+/* 31 */
+/*!**********************************************************************!*\
+  !*** D:/project/git/OOH/node_modules/axios/lib/core/enhanceError.js ***!
+  \**********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -12039,18 +11130,18 @@ module.exports = function enhanceError(error, config, code, request, response) {
 };
 
 /***/ }),
-/* 36 */
-/*!*************************************************************************!*\
-  !*** D:/OOH/node_modules/_axios@0.19.2@axios/lib/core/buildFullPath.js ***!
-  \*************************************************************************/
+/* 32 */
+/*!***********************************************************************!*\
+  !*** D:/project/git/OOH/node_modules/axios/lib/core/buildFullPath.js ***!
+  \***********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var isAbsoluteURL = __webpack_require__(/*! ../helpers/isAbsoluteURL */ 37);
-var combineURLs = __webpack_require__(/*! ../helpers/combineURLs */ 38);
+var isAbsoluteURL = __webpack_require__(/*! ../helpers/isAbsoluteURL */ 33);
+var combineURLs = __webpack_require__(/*! ../helpers/combineURLs */ 34);
 
 /**
                                                       * Creates a new URL by combining the baseURL with the requestedURL,
@@ -12069,10 +11160,10 @@ module.exports = function buildFullPath(baseURL, requestedURL) {
 };
 
 /***/ }),
-/* 37 */
-/*!****************************************************************************!*\
-  !*** D:/OOH/node_modules/_axios@0.19.2@axios/lib/helpers/isAbsoluteURL.js ***!
-  \****************************************************************************/
+/* 33 */
+/*!**************************************************************************!*\
+  !*** D:/project/git/OOH/node_modules/axios/lib/helpers/isAbsoluteURL.js ***!
+  \**************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -12093,10 +11184,10 @@ module.exports = function isAbsoluteURL(url) {
 };
 
 /***/ }),
-/* 38 */
-/*!**************************************************************************!*\
-  !*** D:/OOH/node_modules/_axios@0.19.2@axios/lib/helpers/combineURLs.js ***!
-  \**************************************************************************/
+/* 34 */
+/*!************************************************************************!*\
+  !*** D:/project/git/OOH/node_modules/axios/lib/helpers/combineURLs.js ***!
+  \************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -12117,17 +11208,17 @@ module.exports = function combineURLs(baseURL, relativeURL) {
 };
 
 /***/ }),
-/* 39 */
-/*!***************************************************************************!*\
-  !*** D:/OOH/node_modules/_axios@0.19.2@axios/lib/helpers/parseHeaders.js ***!
-  \***************************************************************************/
+/* 35 */
+/*!*************************************************************************!*\
+  !*** D:/project/git/OOH/node_modules/axios/lib/helpers/parseHeaders.js ***!
+  \*************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var utils = __webpack_require__(/*! ./../utils */ 20);
+var utils = __webpack_require__(/*! ./../utils */ 16);
 
 // Headers whose duplicates are ignored by node
 // c.f. https://nodejs.org/api/http.html#http_message_headers
@@ -12180,17 +11271,17 @@ module.exports = function parseHeaders(headers) {
 };
 
 /***/ }),
-/* 40 */
-/*!******************************************************************************!*\
-  !*** D:/OOH/node_modules/_axios@0.19.2@axios/lib/helpers/isURLSameOrigin.js ***!
-  \******************************************************************************/
+/* 36 */
+/*!****************************************************************************!*\
+  !*** D:/project/git/OOH/node_modules/axios/lib/helpers/isURLSameOrigin.js ***!
+  \****************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var utils = __webpack_require__(/*! ./../utils */ 20);
+var utils = __webpack_require__(/*! ./../utils */ 16);
 
 module.exports =
 utils.isStandardBrowserEnv() ?
@@ -12257,17 +11348,17 @@ function nonStandardBrowserEnv() {
 }();
 
 /***/ }),
-/* 41 */
-/*!**********************************************************************!*\
-  !*** D:/OOH/node_modules/_axios@0.19.2@axios/lib/helpers/cookies.js ***!
-  \**********************************************************************/
+/* 37 */
+/*!********************************************************************!*\
+  !*** D:/project/git/OOH/node_modules/axios/lib/helpers/cookies.js ***!
+  \********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var utils = __webpack_require__(/*! ./../utils */ 20);
+var utils = __webpack_require__(/*! ./../utils */ 16);
 
 module.exports =
 utils.isStandardBrowserEnv() ?
@@ -12319,17 +11410,17 @@ function nonStandardBrowserEnv() {
 }();
 
 /***/ }),
-/* 42 */
-/*!***********************************************************************!*\
-  !*** D:/OOH/node_modules/_axios@0.19.2@axios/lib/core/mergeConfig.js ***!
-  \***********************************************************************/
+/* 38 */
+/*!*********************************************************************!*\
+  !*** D:/project/git/OOH/node_modules/axios/lib/core/mergeConfig.js ***!
+  \*********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var utils = __webpack_require__(/*! ../utils */ 20);
+var utils = __webpack_require__(/*! ../utils */ 16);
 
 /**
                                   * Config-specific merge-function which creates a new config-object
@@ -12402,10 +11493,10 @@ module.exports = function mergeConfig(config1, config2) {
 };
 
 /***/ }),
-/* 43 */
-/*!********************************************************************!*\
-  !*** D:/OOH/node_modules/_axios@0.19.2@axios/lib/cancel/Cancel.js ***!
-  \********************************************************************/
+/* 39 */
+/*!******************************************************************!*\
+  !*** D:/project/git/OOH/node_modules/axios/lib/cancel/Cancel.js ***!
+  \******************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -12431,17 +11522,17 @@ Cancel.prototype.__CANCEL__ = true;
 module.exports = Cancel;
 
 /***/ }),
-/* 44 */
-/*!*************************************************************************!*\
-  !*** D:/OOH/node_modules/_axios@0.19.2@axios/lib/cancel/CancelToken.js ***!
-  \*************************************************************************/
+/* 40 */
+/*!***********************************************************************!*\
+  !*** D:/project/git/OOH/node_modules/axios/lib/cancel/CancelToken.js ***!
+  \***********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var Cancel = __webpack_require__(/*! ./Cancel */ 43);
+var Cancel = __webpack_require__(/*! ./Cancel */ 39);
 
 /**
                                    * A `CancelToken` is an object that can be used to request cancellation of an operation.
@@ -12498,10 +11589,10 @@ CancelToken.source = function source() {
 module.exports = CancelToken;
 
 /***/ }),
-/* 45 */
-/*!*********************************************************************!*\
-  !*** D:/OOH/node_modules/_axios@0.19.2@axios/lib/helpers/spread.js ***!
-  \*********************************************************************/
+/* 41 */
+/*!*******************************************************************!*\
+  !*** D:/project/git/OOH/node_modules/axios/lib/helpers/spread.js ***!
+  \*******************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -12535,7 +11626,7 @@ module.exports = function spread(callback) {
 };
 
 /***/ }),
-/* 46 */
+/* 42 */
 /*!**************************************!*\
   !*** ./node_modules/qs/lib/index.js ***!
   \**************************************/
@@ -12545,9 +11636,9 @@ module.exports = function spread(callback) {
 "use strict";
 
 
-var stringify = __webpack_require__(/*! ./stringify */ 47);
-var parse = __webpack_require__(/*! ./parse */ 50);
-var formats = __webpack_require__(/*! ./formats */ 49);
+var stringify = __webpack_require__(/*! ./stringify */ 43);
+var parse = __webpack_require__(/*! ./parse */ 46);
+var formats = __webpack_require__(/*! ./formats */ 45);
 
 module.exports = {
     formats: formats,
@@ -12557,7 +11648,7 @@ module.exports = {
 
 
 /***/ }),
-/* 47 */
+/* 43 */
 /*!******************************************!*\
   !*** ./node_modules/qs/lib/stringify.js ***!
   \******************************************/
@@ -12567,8 +11658,8 @@ module.exports = {
 "use strict";
 
 
-var utils = __webpack_require__(/*! ./utils */ 48);
-var formats = __webpack_require__(/*! ./formats */ 49);
+var utils = __webpack_require__(/*! ./utils */ 44);
+var formats = __webpack_require__(/*! ./formats */ 45);
 
 var arrayPrefixGenerators = {
     brackets: function brackets(prefix) { // eslint-disable-line func-name-matching
@@ -12778,7 +11869,7 @@ module.exports = function (object, opts) {
 
 
 /***/ }),
-/* 48 */
+/* 44 */
 /*!**************************************!*\
   !*** ./node_modules/qs/lib/utils.js ***!
   \**************************************/
@@ -13002,7 +12093,7 @@ module.exports = {
 
 
 /***/ }),
-/* 49 */
+/* 45 */
 /*!****************************************!*\
   !*** ./node_modules/qs/lib/formats.js ***!
   \****************************************/
@@ -13031,7 +12122,7 @@ module.exports = {
 
 
 /***/ }),
-/* 50 */
+/* 46 */
 /*!**************************************!*\
   !*** ./node_modules/qs/lib/parse.js ***!
   \**************************************/
@@ -13041,7 +12132,7 @@ module.exports = {
 "use strict";
 
 
-var utils = __webpack_require__(/*! ./utils */ 48);
+var utils = __webpack_require__(/*! ./utils */ 44);
 
 var has = Object.prototype.hasOwnProperty;
 
@@ -13216,10 +12307,10 @@ module.exports = function (str, opts) {
 
 
 /***/ }),
-/* 51 */
-/*!***************************!*\
-  !*** D:/OOH/util/util.js ***!
-  \***************************/
+/* 47 */
+/*!***************************************!*\
+  !*** D:/project/git/OOH/util/util.js ***!
+  \***************************************/
 /*! no static exports found */
 /***/ (function(module, exports) {
 
@@ -13333,10 +12424,10 @@ module.exports = {
   guid: guid };
 
 /***/ }),
-/* 52 */
-/*!**************************!*\
-  !*** D:/OOH/util/md5.js ***!
-  \**************************/
+/* 48 */
+/*!**************************************!*\
+  !*** D:/project/git/OOH/util/md5.js ***!
+  \**************************************/
 /*! no static exports found */
 /***/ (function(module, exports) {
 
@@ -13546,9 +12637,9 @@ module.exports = {
   hex_md5: hexMD5 };
 
 /***/ }),
-/* 53 */,
-/* 54 */,
-/* 55 */
+/* 49 */,
+/* 50 */,
+/* 51 */
 /*!**********************************************************************************************************!*\
   !*** ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib/runtime/componentNormalizer.js ***!
   \**********************************************************************************************************/
@@ -13676,21 +12767,21 @@ function normalizeComponent (
 
 
 /***/ }),
-/* 56 */
-/*!*****************************!*\
-  !*** D:/OOH/store/index.js ***!
-  \*****************************/
+/* 52 */
+/*!*****************************************!*\
+  !*** D:/project/git/OOH/store/index.js ***!
+  \*****************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var _vue = _interopRequireDefault(__webpack_require__(/*! vue */ 2));
-var _vuex = _interopRequireDefault(__webpack_require__(/*! vuex */ 17));
+var _vuex = _interopRequireDefault(__webpack_require__(/*! vuex */ 13));
 
-var _userLogin_ST = _interopRequireDefault(__webpack_require__(/*! ./userLogin_ST.js */ 57));
-var _home_ST = _interopRequireDefault(__webpack_require__(/*! ./home_ST.js */ 58));
-var _myList_ST = _interopRequireDefault(__webpack_require__(/*! ./myList_ST.js */ 59));
-var _speed_ST = _interopRequireDefault(__webpack_require__(/*! ./speed_ST.js */ 60));function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
+var _userLogin_ST = _interopRequireDefault(__webpack_require__(/*! ./userLogin_ST.js */ 53));
+var _home_ST = _interopRequireDefault(__webpack_require__(/*! ./home_ST.js */ 54));
+var _myList_ST = _interopRequireDefault(__webpack_require__(/*! ./myList_ST.js */ 55));
+var _speed_ST = _interopRequireDefault(__webpack_require__(/*! ./speed_ST.js */ 56));function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
 _vue.default.use(_vuex.default);
 
 var store = new _vuex.default.Store({
@@ -13717,16 +12808,16 @@ store.dispatch("speed/init");var _default =
 store;exports.default = _default;
 
 /***/ }),
-/* 57 */
-/*!************************************!*\
-  !*** D:/OOH/store/userLogin_ST.js ***!
-  \************************************/
+/* 53 */
+/*!************************************************!*\
+  !*** D:/project/git/OOH/store/userLogin_ST.js ***!
+  \************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(uni) {Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var _vue = _interopRequireDefault(__webpack_require__(/*! vue */ 2));
-var _request_UT = __webpack_require__(/*! @/util/request_UT.js */ 13);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}var _default =
+var _request_UT = __webpack_require__(/*! @/util/request_UT.js */ 9);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}var _default =
 {
   namespaced: true,
   state: {
@@ -13758,16 +12849,16 @@ var _request_UT = __webpack_require__(/*! @/util/request_UT.js */ 13);function _
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 1)["default"]))
 
 /***/ }),
-/* 58 */
-/*!*******************************!*\
-  !*** D:/OOH/store/home_ST.js ***!
-  \*******************************/
+/* 54 */
+/*!*******************************************!*\
+  !*** D:/project/git/OOH/store/home_ST.js ***!
+  \*******************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(uni) {Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var _vue = _interopRequireDefault(__webpack_require__(/*! vue */ 2));
-var _request_UT = __webpack_require__(/*! @/util/request_UT.js */ 13);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}var _default =
+var _request_UT = __webpack_require__(/*! @/util/request_UT.js */ 9);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}var _default =
 {
   namespaced: true,
   state: {
@@ -13814,16 +12905,16 @@ var _request_UT = __webpack_require__(/*! @/util/request_UT.js */ 13);function _
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 1)["default"]))
 
 /***/ }),
-/* 59 */
-/*!*********************************!*\
-  !*** D:/OOH/store/myList_ST.js ***!
-  \*********************************/
+/* 55 */
+/*!*********************************************!*\
+  !*** D:/project/git/OOH/store/myList_ST.js ***!
+  \*********************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(uni) {Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var _vue = _interopRequireDefault(__webpack_require__(/*! vue */ 2));
-var _request_UT = __webpack_require__(/*! @/util/request_UT.js */ 13);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}var _default =
+var _request_UT = __webpack_require__(/*! @/util/request_UT.js */ 9);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}var _default =
 {
   namespaced: true,
   state: {
@@ -13889,16 +12980,16 @@ var _request_UT = __webpack_require__(/*! @/util/request_UT.js */ 13);function _
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 1)["default"]))
 
 /***/ }),
-/* 60 */
-/*!********************************!*\
-  !*** D:/OOH/store/speed_ST.js ***!
-  \********************************/
+/* 56 */
+/*!********************************************!*\
+  !*** D:/project/git/OOH/store/speed_ST.js ***!
+  \********************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(uni) {Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var _vue = _interopRequireDefault(__webpack_require__(/*! vue */ 2));
-var _request_UT = __webpack_require__(/*! @/util/request_UT.js */ 13);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}var _default =
+var _request_UT = __webpack_require__(/*! @/util/request_UT.js */ 9);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}var _default =
 {
   namespaced: true,
   state: {
@@ -13929,14 +13020,14 @@ var _request_UT = __webpack_require__(/*! @/util/request_UT.js */ 13);function _
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 1)["default"]))
 
 /***/ }),
-/* 61 */
-/*!*********************************************************************************!*\
-  !*** D:/OOH/node_modules/_vue-clipboard2@0.3.1@vue-clipboard2/vue-clipboard.js ***!
-  \*********************************************************************************/
+/* 57 */
+/*!***********************************************************************!*\
+  !*** D:/project/git/OOH/node_modules/vue-clipboard2/vue-clipboard.js ***!
+  \***********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-// var Clipboard = require('clipboard/dist/clipboard.min.js') // FIXME: workaround for browserify
+var Clipboard = __webpack_require__(/*! clipboard/dist/clipboard.min.js */ 58); // FIXME: workaround for browserify
 
 var VueClipboardConfig = {
   autoSetContainer: false,
@@ -14021,10 +13112,26 @@ if (true) {
 } else {}
 
 /***/ }),
-/* 62 */
-/*!*********************************!*\
-  !*** D:/OOH/style/iconfont.css ***!
-  \*********************************/
+/* 58 */
+/*!***********************************************************************!*\
+  !*** D:/project/git/OOH/node_modules/clipboard/dist/clipboard.min.js ***!
+  \***********************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+/*!
+ * clipboard.js v2.0.6
+ * https://clipboardjs.com/
+ * 
+ * Licensed MIT © Zeno Rocha
+ */
+!function (t, e) { true ? module.exports = e() : undefined;}(this, function () {return o = {}, r.m = n = [function (t, e) {t.exports = function (t) {var e;if ("SELECT" === t.nodeName) t.focus(), e = t.value;else if ("INPUT" === t.nodeName || "TEXTAREA" === t.nodeName) {var n = t.hasAttribute("readonly");n || t.setAttribute("readonly", ""), t.select(), t.setSelectionRange(0, t.value.length), n || t.removeAttribute("readonly"), e = t.value;} else {t.hasAttribute("contenteditable") && t.focus();var o = window.getSelection(),r = document.createRange();r.selectNodeContents(t), o.removeAllRanges(), o.addRange(r), e = o.toString();}return e;};}, function (t, e) {function n() {}n.prototype = { on: function on(t, e, n) {var o = this.e || (this.e = {});return (o[t] || (o[t] = [])).push({ fn: e, ctx: n }), this;}, once: function once(t, e, n) {var o = this;function r() {o.off(t, r), e.apply(n, arguments);}return r._ = e, this.on(t, r, n);}, emit: function emit(t) {for (var e = [].slice.call(arguments, 1), n = ((this.e || (this.e = {}))[t] || []).slice(), o = 0, r = n.length; o < r; o++) {n[o].fn.apply(n[o].ctx, e);}return this;}, off: function off(t, e) {var n = this.e || (this.e = {}),o = n[t],r = [];if (o && e) for (var i = 0, a = o.length; i < a; i++) {o[i].fn !== e && o[i].fn._ !== e && r.push(o[i]);}return r.length ? n[t] = r : delete n[t], this;} }, t.exports = n, t.exports.TinyEmitter = n;}, function (t, e, n) {var d = n(3),h = n(4);t.exports = function (t, e, n) {if (!t && !e && !n) throw new Error("Missing required arguments");if (!d.string(e)) throw new TypeError("Second argument must be a String");if (!d.fn(n)) throw new TypeError("Third argument must be a Function");if (d.node(t)) return s = e, f = n, (u = t).addEventListener(s, f), { destroy: function destroy() {u.removeEventListener(s, f);} };if (d.nodeList(t)) return a = t, c = e, l = n, Array.prototype.forEach.call(a, function (t) {t.addEventListener(c, l);}), { destroy: function destroy() {Array.prototype.forEach.call(a, function (t) {t.removeEventListener(c, l);});} };if (d.string(t)) return o = t, r = e, i = n, h(document.body, o, r, i);throw new TypeError("First argument must be a String, HTMLElement, HTMLCollection, or NodeList");var o, r, i, a, c, l, u, s, f;};}, function (t, n) {n.node = function (t) {return void 0 !== t && t instanceof HTMLElement && 1 === t.nodeType;}, n.nodeList = function (t) {var e = Object.prototype.toString.call(t);return void 0 !== t && ("[object NodeList]" === e || "[object HTMLCollection]" === e) && "length" in t && (0 === t.length || n.node(t[0]));}, n.string = function (t) {return "string" == typeof t || t instanceof String;}, n.fn = function (t) {return "[object Function]" === Object.prototype.toString.call(t);};}, function (t, e, n) {var a = n(5);function i(t, e, n, o, r) {var i = function (e, n, t, o) {return function (t) {t.delegateTarget = a(t.target, n), t.delegateTarget && o.call(e, t);};}.apply(this, arguments);return t.addEventListener(n, i, r), { destroy: function destroy() {t.removeEventListener(n, i, r);} };}t.exports = function (t, e, n, o, r) {return "function" == typeof t.addEventListener ? i.apply(null, arguments) : "function" == typeof n ? i.bind(null, document).apply(null, arguments) : ("string" == typeof t && (t = document.querySelectorAll(t)), Array.prototype.map.call(t, function (t) {return i(t, e, n, o, r);}));};}, function (t, e) {if ("undefined" != typeof Element && !Element.prototype.matches) {var n = Element.prototype;n.matches = n.matchesSelector || n.mozMatchesSelector || n.msMatchesSelector || n.oMatchesSelector || n.webkitMatchesSelector;}t.exports = function (t, e) {for (; t && 9 !== t.nodeType;) {if ("function" == typeof t.matches && t.matches(e)) return t;t = t.parentNode;}};}, function (t, e, n) {"use strict";n.r(e);var o = n(0),r = n.n(o),i = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (t) {return typeof t;} : function (t) {return t && "function" == typeof Symbol && t.constructor === Symbol && t !== Symbol.prototype ? "symbol" : typeof t;};function a(t, e) {for (var n = 0; n < e.length; n++) {var o = e[n];o.enumerable = o.enumerable || !1, o.configurable = !0, "value" in o && (o.writable = !0), Object.defineProperty(t, o.key, o);}}function c(t) {!function (t, e) {if (!(t instanceof e)) throw new TypeError("Cannot call a class as a function");}(this, c), this.resolveOptions(t), this.initSelection();}var l = (function (t, e, n) {return e && a(t.prototype, e), n && a(t, n), t;}(c, [{ key: "resolveOptions", value: function value(t) {var e = 0 < arguments.length && void 0 !== t ? t : {};this.action = e.action, this.container = e.container, this.emitter = e.emitter, this.target = e.target, this.text = e.text, this.trigger = e.trigger, this.selectedText = "";} }, { key: "initSelection", value: function value() {this.text ? this.selectFake() : this.target && this.selectTarget();} }, { key: "selectFake", value: function value() {var t = this,e = "rtl" == document.documentElement.getAttribute("dir");this.removeFake(), this.fakeHandlerCallback = function () {return t.removeFake();}, this.fakeHandler = this.container.addEventListener("click", this.fakeHandlerCallback) || !0, this.fakeElem = document.createElement("textarea"), this.fakeElem.style.fontSize = "12pt", this.fakeElem.style.border = "0", this.fakeElem.style.padding = "0", this.fakeElem.style.margin = "0", this.fakeElem.style.position = "absolute", this.fakeElem.style[e ? "right" : "left"] = "-9999px";var n = window.pageYOffset || document.documentElement.scrollTop;this.fakeElem.style.top = n + "px", this.fakeElem.setAttribute("readonly", ""), this.fakeElem.value = this.text, this.container.appendChild(this.fakeElem), this.selectedText = r()(this.fakeElem), this.copyText();} }, { key: "removeFake", value: function value() {this.fakeHandler && (this.container.removeEventListener("click", this.fakeHandlerCallback), this.fakeHandler = null, this.fakeHandlerCallback = null), this.fakeElem && (this.container.removeChild(this.fakeElem), this.fakeElem = null);} }, { key: "selectTarget", value: function value() {this.selectedText = r()(this.target), this.copyText();} }, { key: "copyText", value: function value() {var e = void 0;try {e = document.execCommand(this.action);} catch (t) {e = !1;}this.handleResult(e);} }, { key: "handleResult", value: function value(t) {this.emitter.emit(t ? "success" : "error", { action: this.action, text: this.selectedText, trigger: this.trigger, clearSelection: this.clearSelection.bind(this) });} }, { key: "clearSelection", value: function value() {this.trigger && this.trigger.focus(), document.activeElement.blur(), window.getSelection().removeAllRanges();} }, { key: "destroy", value: function value() {this.removeFake();} }, { key: "action", set: function set(t) {var e = 0 < arguments.length && void 0 !== t ? t : "copy";if (this._action = e, "copy" !== this._action && "cut" !== this._action) throw new Error('Invalid "action" value, use either "copy" or "cut"');}, get: function get() {return this._action;} }, { key: "target", set: function set(t) {if (void 0 !== t) {if (!t || "object" !== (void 0 === t ? "undefined" : i(t)) || 1 !== t.nodeType) throw new Error('Invalid "target" value, use a valid Element');if ("copy" === this.action && t.hasAttribute("disabled")) throw new Error('Invalid "target" attribute. Please use "readonly" instead of "disabled" attribute');if ("cut" === this.action && (t.hasAttribute("readonly") || t.hasAttribute("disabled"))) throw new Error('Invalid "target" attribute. You can\'t cut text from elements with "readonly" or "disabled" attributes');this._target = t;}}, get: function get() {return this._target;} }]), c),u = n(1),s = n.n(u),f = n(2),d = n.n(f),h = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (t) {return typeof t;} : function (t) {return t && "function" == typeof Symbol && t.constructor === Symbol && t !== Symbol.prototype ? "symbol" : typeof t;},p = function p(t, e, n) {return e && y(t.prototype, e), n && y(t, n), t;};function y(t, e) {for (var n = 0; n < e.length; n++) {var o = e[n];o.enumerable = o.enumerable || !1, o.configurable = !0, "value" in o && (o.writable = !0), Object.defineProperty(t, o.key, o);}}var m = (function (t, e) {if ("function" != typeof e && null !== e) throw new TypeError("Super expression must either be null or a function, not " + typeof e);t.prototype = Object.create(e && e.prototype, { constructor: { value: t, enumerable: !1, writable: !0, configurable: !0 } }), e && (Object.setPrototypeOf ? Object.setPrototypeOf(t, e) : t.__proto__ = e);}(v, s.a), p(v, [{ key: "resolveOptions", value: function value(t) {var e = 0 < arguments.length && void 0 !== t ? t : {};this.action = "function" == typeof e.action ? e.action : this.defaultAction, this.target = "function" == typeof e.target ? e.target : this.defaultTarget, this.text = "function" == typeof e.text ? e.text : this.defaultText, this.container = "object" === h(e.container) ? e.container : document.body;} }, { key: "listenClick", value: function value(t) {var e = this;this.listener = d()(t, "click", function (t) {return e.onClick(t);});} }, { key: "onClick", value: function value(t) {var e = t.delegateTarget || t.currentTarget;this.clipboardAction && (this.clipboardAction = null), this.clipboardAction = new l({ action: this.action(e), target: this.target(e), text: this.text(e), container: this.container, trigger: e, emitter: this });} }, { key: "defaultAction", value: function value(t) {return b("action", t);} }, { key: "defaultTarget", value: function value(t) {var e = b("target", t);if (e) return document.querySelector(e);} }, { key: "defaultText", value: function value(t) {return b("text", t);} }, { key: "destroy", value: function value() {this.listener.destroy(), this.clipboardAction && (this.clipboardAction.destroy(), this.clipboardAction = null);} }], [{ key: "isSupported", value: function value(t) {var e = 0 < arguments.length && void 0 !== t ? t : ["copy", "cut"],n = "string" == typeof e ? [e] : e,o = !!document.queryCommandSupported;return n.forEach(function (t) {o = o && !!document.queryCommandSupported(t);}), o;} }]), v);function v(t, e) {!function (t, e) {if (!(t instanceof e)) throw new TypeError("Cannot call a class as a function");}(this, v);var n = function (t, e) {if (!t) throw new ReferenceError("this hasn't been initialised - super() hasn't been called");return !e || "object" != typeof e && "function" != typeof e ? t : e;}(this, (v.__proto__ || Object.getPrototypeOf(v)).call(this));return n.resolveOptions(e), n.listenClick(t), n;}function b(t, e) {var n = "data-clipboard-" + t;if (e.hasAttribute(n)) return e.getAttribute(n);}e.default = m;}], r.c = o, r.d = function (t, e, n) {r.o(t, e) || Object.defineProperty(t, e, { enumerable: !0, get: n });}, r.r = function (t) {"undefined" != typeof Symbol && Symbol.toStringTag && Object.defineProperty(t, Symbol.toStringTag, { value: "Module" }), Object.defineProperty(t, "__esModule", { value: !0 });}, r.t = function (e, t) {if (1 & t && (e = r(e)), 8 & t) return e;if (4 & t && "object" == typeof e && e && e.__esModule) return e;var n = Object.create(null);if (r.r(n), Object.defineProperty(n, "default", { enumerable: !0, value: e }), 2 & t && "string" != typeof e) for (var o in e) {r.d(n, o, function (t) {return e[t];}.bind(null, o));}return n;}, r.n = function (t) {var e = t && t.__esModule ? function () {return t.default;} : function () {return t;};return r.d(e, "a", e), e;}, r.o = function (t, e) {return Object.prototype.hasOwnProperty.call(t, e);}, r.p = "", r(r.s = 6).default;function r(t) {if (o[t]) return o[t].exports;var e = o[t] = { i: t, l: !1, exports: {} };return n[t].call(e.exports, e, e.exports, r), e.l = !0, e.exports;}var n, o;});
+
+/***/ }),
+/* 59 */
+/*!*********************************************!*\
+  !*** D:/project/git/OOH/style/iconfont.css ***!
+  \*********************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -14033,10 +13140,10 @@ if (true) {
   
 
 /***/ }),
-/* 63 */
-/*!*********************************!*\
-  !*** D:/OOH/common/common.scss ***!
-  \*********************************/
+/* 60 */
+/*!*********************************************!*\
+  !*** D:/project/git/OOH/common/common.scss ***!
+  \*********************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -14045,21 +13152,21 @@ if (true) {
   
 
 /***/ }),
+/* 61 */,
+/* 62 */,
+/* 63 */,
 /* 64 */,
 /* 65 */,
 /* 66 */,
-/* 67 */,
-/* 68 */,
-/* 69 */,
-/* 70 */
-/*!**********************************!*\
-  !*** D:/OOH/mixin/allPage_MX.js ***!
-  \**********************************/
+/* 67 */
+/*!**********************************************!*\
+  !*** D:/project/git/OOH/mixin/allPage_MX.js ***!
+  \**********************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(uni) {var _config = _interopRequireDefault(__webpack_require__(/*! @/common/config */ 12));function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
+/* WEBPACK VAR INJECTION */(function(uni) {var _config = _interopRequireDefault(__webpack_require__(/*! @/common/config */ 8));function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
 module.exports = {
   components: {},
   data: function data() {
@@ -14106,6 +13213,9 @@ module.exports = {
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 1)["default"]))
 
 /***/ }),
+/* 68 */,
+/* 69 */,
+/* 70 */,
 /* 71 */,
 /* 72 */,
 /* 73 */,
@@ -14123,18 +13233,15 @@ module.exports = {
 /* 85 */,
 /* 86 */,
 /* 87 */,
-/* 88 */,
-/* 89 */,
-/* 90 */,
-/* 91 */
-/*!**************************************!*\
-  !*** D:/OOH/mixin/publicCheck_MX.js ***!
-  \**************************************/
+/* 88 */
+/*!**************************************************!*\
+  !*** D:/project/git/OOH/mixin/publicCheck_MX.js ***!
+  \**************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-var _config = _interopRequireDefault(__webpack_require__(/*! @/common/config */ 12));function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
+var _config = _interopRequireDefault(__webpack_require__(/*! @/common/config */ 8));function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
 module.exports = {
   components: {},
   data: function data() {
@@ -14236,6 +13343,9 @@ module.exports = {
   computed: {} };
 
 /***/ }),
+/* 89 */,
+/* 90 */,
+/* 91 */,
 /* 92 */,
 /* 93 */,
 /* 94 */,
@@ -14303,13 +13413,10 @@ module.exports = {
 /* 156 */,
 /* 157 */,
 /* 158 */,
-/* 159 */,
-/* 160 */,
-/* 161 */,
-/* 162 */
-/*!*****************************!*\
-  !*** D:/OOH/common/util.js ***!
-  \*****************************/
+/* 159 */
+/*!*****************************************!*\
+  !*** D:/project/git/OOH/common/util.js ***!
+  \*****************************************/
 /*! no static exports found */
 /***/ (function(module, exports) {
 
@@ -14485,6 +13592,9 @@ module.exports = {
   getCurrentTime: getCurrentTime };
 
 /***/ }),
+/* 160 */,
+/* 161 */,
+/* 162 */,
 /* 163 */,
 /* 164 */,
 /* 165 */,
@@ -14497,18 +13607,15 @@ module.exports = {
 /* 172 */,
 /* 173 */,
 /* 174 */,
-/* 175 */,
-/* 176 */,
-/* 177 */,
-/* 178 */
-/*!**********************************************!*\
-  !*** D:/OOH/components/uni-calendar/util.js ***!
-  \**********************************************/
+/* 175 */
+/*!**********************************************************!*\
+  !*** D:/project/git/OOH/components/uni-calendar/util.js ***!
+  \**********************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var _calendar = _interopRequireDefault(__webpack_require__(/*! ./calendar.js */ 179));function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}function _classCallCheck(instance, Constructor) {if (!(instance instanceof Constructor)) {throw new TypeError("Cannot call a class as a function");}}function _defineProperties(target, props) {for (var i = 0; i < props.length; i++) {var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);}}function _createClass(Constructor, protoProps, staticProps) {if (protoProps) _defineProperties(Constructor.prototype, protoProps);if (staticProps) _defineProperties(Constructor, staticProps);return Constructor;}var
+Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var _calendar = _interopRequireDefault(__webpack_require__(/*! ./calendar.js */ 176));function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}function _classCallCheck(instance, Constructor) {if (!(instance instanceof Constructor)) {throw new TypeError("Cannot call a class as a function");}}function _defineProperties(target, props) {for (var i = 0; i < props.length; i++) {var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);}}function _createClass(Constructor, protoProps, staticProps) {if (protoProps) _defineProperties(Constructor.prototype, protoProps);if (staticProps) _defineProperties(Constructor, staticProps);return Constructor;}var
 
 Calendar = /*#__PURE__*/function () {
   function Calendar()
@@ -14862,10 +13969,10 @@ Calendar = /*#__PURE__*/function () {
 Calendar;exports.default = _default;
 
 /***/ }),
-/* 179 */
-/*!**************************************************!*\
-  !*** D:/OOH/components/uni-calendar/calendar.js ***!
-  \**************************************************/
+/* 176 */
+/*!**************************************************************!*\
+  !*** D:/project/git/OOH/components/uni-calendar/calendar.js ***!
+  \**************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 

@@ -1,4 +1,3 @@
-/* #ifndef APP-PLUS-NVUE */
 page{
 	width: 100%;
 	height:100%;
@@ -62,4 +61,11 @@ img{
 .bt{
 	border-top: 30rpx solid #edecea;
 }
-/*  #endif  */
+.noData{
+	padding-top: 300rpx;
+	image{
+		margin: 0 auto;
+		width: 50%;
+		display: block;
+	}
+}

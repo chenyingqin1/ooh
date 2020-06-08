@@ -66,7 +66,7 @@ page {
 /*默认紫暂无*/
 /*默认黑*/
 /*默认白*/
-.title.data-v-11d50d82 {
+.title.data-v-44412c3c {
   position: fixed;
   top: 0;
   right: 0;
@@ -78,19 +78,19 @@ page {
   width: 100%;
   text-align: center;
 }
-.title view.data-v-11d50d82 {
-    display: inline-block;
-    padding: 30rpx 0;
+.title view.data-v-44412c3c {
+  display: inline-block;
+  padding: 30rpx 0;
 }
-.info.data-v-11d50d82 {
+.info.data-v-44412c3c {
   background: #fff;
   text-align: center;
 }
-.info .list.data-v-11d50d82 {
-    border-bottom: 2rpx solid #f2f2f2;
+.info .list.data-v-44412c3c {
+  border-bottom: 2rpx solid #f2f2f2;
 }
-.info .list view.data-v-11d50d82 {
-      display: inline-block;
-      padding: 40rpx 0;
+.info .list view.data-v-44412c3c {
+  display: inline-block;
+  padding: 40rpx 0;
 }
 

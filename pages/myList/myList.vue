@@ -9,7 +9,7 @@
 		<view style="height: 110rpx"></view>
 		<scroll-view class="scroll" :scroll-y="true" :style="{height: systemInfo.windowHeight-scrollViewheight +'px'}" :enable-back-to-top="true" refresher-enabled="true" :refresher-triggered="triggered" @refresherrefresh="onRefresh" @scrolltolower="updateRefresh" @refresherrestore="onRestore" >
 			<block v-if="currentIndex == 0">
-				<view class="listWrap" :class="{cur:present}">
+				<view class="listWrap" :class="{cur:present}" v-if="taskfileList.length > 0" >
 					<view class="item" :class="{cur:present}" v-for="(item, index) in taskfileList" :key="index">
 						<view class="block" @click="goPictureDet(item)" v-if="!present">
 							<view class="checkBox" :class="{cur:item.checkBox}" @click.stop="selectCh(index)"></view>
@@ -41,10 +41,11 @@
 						</view>
 					</view>
 				</view>
+				<view class="noData" v-else><image mode="widthFix" src="https://oohmonitoring.dentsuaegis.cn:8081/images/OSicons/no-task-list.png" /></view>
 			</block>
 			<block  v-if="currentIndex == 1">
 				<view class="listWrap" :class="{cur:present}">
-					<view class="item" :class="{cur:present}" @click="goPictureDet(item)" v-for="(item, index) in spotFilesList" :key="index">
+					<view class="item" v-if="spotFilesList.length > 0" :class="{cur:present}" @click="goPictureDet(item)" v-for="(item, index) in spotFilesList" :key="index">
 						<view class="block cur" v-if="!present">
 							<view class="title">
 								<view class="name">
@@ -66,6 +67,7 @@
 							<video class="img" id="myVideo" v-if="item.spotClassTypeName.indexOf('视频') != -1" :src="item.fileUrl" :controls="false"></video>
 						</view>
 					</view>
+					<view class="noData" v-else><image mode="widthFix" src="https://oohmonitoring.dentsuaegis.cn:8081/images/OSicons/no-task-list.png" /></view>
 				</view>
 			</block>
 		</scroll-view>

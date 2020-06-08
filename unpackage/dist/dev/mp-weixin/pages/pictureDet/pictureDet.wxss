@@ -30,76 +30,76 @@
 /*默认紫暂无*/
 /*默认黑*/
 /*默认白*/
-.imgInfo.data-v-612b9592 {
+.imgInfo.data-v-77b413cc {
   height: 100%;
 }
-.imgInfo .imgList.data-v-612b9592 {
-    position: relative;
-    height: 80%;
-    overflow: hidden;
+.imgInfo .imgList.data-v-77b413cc {
+  position: relative;
+  height: 80%;
+  overflow: hidden;
 }
-.imgInfo .imgList .list.data-v-612b9592 {
-      position: absolute;
-      bottom: 0;
-      width: 100%;
-      background: rgba(0, 0, 0, 0.5);
+.imgInfo .imgList .list.data-v-77b413cc {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.5);
 }
-.imgInfo .imgList .list .name.data-v-612b9592 {
-        color: #fff;
-        padding: 30rpx;
+.imgInfo .imgList .list .name.data-v-77b413cc {
+  color: #fff;
+  padding: 30rpx;
 }
-.imgInfo .imgList .list .imgs .img.data-v-612b9592 {
-        float: left;
-        width: 120rpx;
-        height: 120rpx;
-        margin-right: 5rpx;
+.imgInfo .imgList .list .imgs .img.data-v-77b413cc {
+  float: left;
+  width: 120rpx;
+  height: 120rpx;
+  margin-right: 5rpx;
 }
-.imgInfo .imgList .list .imgs .img.cur.data-v-612b9592 {
-          border: 2rpx solid #ff0000;
+.imgInfo .imgList .list .imgs .img.cur.data-v-77b413cc {
+  border: 2rpx solid #ff0000;
 }
-.imgInfo .imgList .img.data-v-612b9592 {
-      width: 100%;
-      height: 100%;
-      background: url(https://oohmonitoring.dentsuaegis.cn:8081/images/OSicons/pv-bg.jpg) no-repeat center center;
-      background-size: 100% 100%;
+.imgInfo .imgList .img.data-v-77b413cc {
+  width: 100%;
+  height: 100%;
+  background: url(https://oohmonitoring.dentsuaegis.cn:8081/images/OSicons/pv-bg.jpg) no-repeat center center;
+  background-size: 100% 100%;
 }
-.imgInfo .imgList .video.data-v-612b9592 {
-      width: 100%;
-      height: 100%;
-      background: url(https://oohmonitoring.dentsuaegis.cn:8081/images/OSicons/pv-bg.jpg) no-repeat center center;
-      background-size: 100% 100%;
+.imgInfo .imgList .video.data-v-77b413cc {
+  width: 100%;
+  height: 100%;
+  background: url(https://oohmonitoring.dentsuaegis.cn:8081/images/OSicons/pv-bg.jpg) no-repeat center center;
+  background-size: 100% 100%;
 }
-.info.data-v-612b9592 {
+.info.data-v-77b413cc {
   padding-top: 10rpx;
 }
-.info.cur view.data-v-612b9592 {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+.info.cur view.data-v-77b413cc {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-.info.p.data-v-612b9592 {
-    background: #fff;
-    height: 100%;
+.info.p.data-v-77b413cc {
+  background: #fff;
+  height: 100%;
 }
-.info view.data-v-612b9592 {
-    padding: 10rpx;
-    line-height: 40rpx;
+.info view.data-v-77b413cc {
+  padding: 10rpx;
+  line-height: 40rpx;
 }
-.info view text.data-v-612b9592 {
-      color: #bdbdbd;
-      padding-right: 40rpx;
-      line-height: 47rpx;
+.info view text.data-v-77b413cc {
+  color: #bdbdbd;
+  padding-right: 40rpx;
+  line-height: 47rpx;
 }
-.info view .input.data-v-612b9592 {
-      width: 100%;
+.info view .input.data-v-77b413cc {
+  width: 100%;
 }
-.info .more.data-v-612b9592 {
-    color: #398188;
-    float: right;
+.info .more.data-v-77b413cc {
+  color: #398188;
+  float: right;
 }
-.info .more .img.data-v-612b9592 {
-      padding-left: 5rpx;
-      width: 30rpx;
-      height: 18rpx;
+.info .more .img.data-v-77b413cc {
+  padding-left: 5rpx;
+  width: 30rpx;
+  height: 18rpx;
 }
 
