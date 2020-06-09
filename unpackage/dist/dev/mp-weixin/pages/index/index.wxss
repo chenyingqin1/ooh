@@ -232,14 +232,6 @@ page {
 .listWrap .block .operation .but.cur .icon.data-v-5d2d68db {
             background-image: url(https://oohmonitoring.dentsuaegis.cn:8081/images/icons/gou-yes.png);
 }
-.noData.data-v-5d2d68db {
-  padding-top: 300rpx;
-}
-.noData image.data-v-5d2d68db {
-    margin: 0 auto;
-    width: 50%;
-    display: block;
-}
 .goTopIcon.data-v-5d2d68db {
   position: fixed;
   bottom: 40rpx;

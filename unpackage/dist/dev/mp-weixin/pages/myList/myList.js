@@ -247,6 +247,8 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+
 var _allPage_MX = _interopRequireDefault(__webpack_require__(/*! @/mixin/allPage_MX */ 71));
 var _publicCheck_MX = _interopRequireDefault(__webpack_require__(/*! @/mixin/publicCheck_MX.js */ 92));function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}function _toConsumableArray(arr) {return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();}function _nonIterableSpread() {throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");}function _unsupportedIterableToArray(o, minLen) {if (!o) return;if (typeof o === "string") return _arrayLikeToArray(o, minLen);var n = Object.prototype.toString.call(o).slice(8, -1);if (n === "Object" && o.constructor) n = o.constructor.name;if (n === "Map" || n === "Set") return Array.from(n);if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);}function _iterableToArray(iter) {if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter);}function _arrayWithoutHoles(arr) {if (Array.isArray(arr)) return _arrayLikeToArray(arr);}function _arrayLikeToArray(arr, len) {if (len == null || len > arr.length) len = arr.length;for (var i = 0, arr2 = new Array(len); i < len; i++) {arr2[i] = arr[i];}return arr2;} //
 //
@@ -327,10 +329,10 @@ var _publicCheck_MX = _interopRequireDefault(__webpack_require__(/*! @/mixin/pub
 //
 //
 //
+//
+//
 var md5 = __webpack_require__(/*! @/util/md5.js */ 52);var _default = { mixins: [_allPage_MX.default, _publicCheck_MX.default], components: {}, beforeCreate: function beforeCreate() {}, data: function data() {return { scrollViewheight: 100, currentIndex: 0, tabList: ['待发送', '已完成'], present: false, pageNo: 1, pageSize: 12, taskfileList: [], spotFilesList: [], selectAllCheck: false, selectData: [], triggered: false, updateLock: false };}, computed: { systemInfo: function systemInfo() {return this.$store.state.userLogin.systemInfo;}, userLogin: function userLogin() {return this.$store.state.userLogin.userLogin;} }, onShow: function onShow() {}, onLoad: function onLoad(options) {this.getData();}, mounted: function mounted() {}, watch: {}, onPageScroll: function onPageScroll(e) {}, methods: { getData: function getData() {if (!this.updateLock) {this.updateLock = true;} else {return;}uni.showLoading({ title: '加载中' });if (this.currentIndex == 0) {this.getTaskfileData();} else {this.getSpotFilesData();}}, // 待发送
-    getTaskfileData: function getTaskfileData() {var _this = this;var parms = ',"openid":"' + this.userLogin.user.openid + '"},"spotFileQuery":{"pageNo":' + this.pageNo + ',"pageSize":' + this.pageSize + ',"keyword":""}';this.$store.dispatch('myList/getTaskfileList', { parms: parms, callback: function callback(res) {console.log(res);if (res.errorCode == 0) {var _this$taskfileList;var data = res.spotFileResult.spotFiles;for (var i = 0; i < data.length; i++) {data[i].checkBox = false;}(_this$taskfileList = _this.taskfileList).push.apply(_this$taskfileList, _toConsumableArray(data));if (data.length) {_this.updateLock = false;}} else {
-            uni.showToast({
-              title: res.errorMsg,
+    getTaskfileData: function getTaskfileData() {var _this = this;var parms = ',"openid":"' + this.userLogin.user.openid + '"},"spotFileQuery":{"pageNo":' + this.pageNo + ',"pageSize":' + this.pageSize + ',"keyword":""}';this.$store.dispatch('myList/getTaskfileList', { parms: parms, callback: function callback(res) {console.log(res);if (res.errorCode == 0) {var _this$taskfileList;var data = res.spotFileResult.spotFiles;for (var i = 0; i < data.length; i++) {data[i].checkBox = false;}(_this$taskfileList = _this.taskfileList).push.apply(_this$taskfileList, _toConsumableArray(data));if (data.length) {_this.updateLock = false;}} else {uni.showToast({ title: res.errorMsg,
               icon: 'none',
               mask: true });
 

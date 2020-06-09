@@ -10,7 +10,7 @@
 			<view class="info">
 				<view class="list flex-box" v-for="(item, index) in campaignList" :key="index">
 					<view class="flex-two">{{item.name}}</view>
-					<view class="flex-one" v-for="(v, i) in item.monitorStages" :key="i" v-if="item.displayName == '上刊' || item.displayName == '下刊'">{{v.value}}</view>
+					<view class="flex-one" v-for="(v, i) in item.monitorStages" :key="i" v-if="v.displayName == '上刊' || v.displayName == '下刊'">{{v.value}}</view>
 				</view>
 			</view>
 		</scroll-view>
