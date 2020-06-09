@@ -66,11 +66,11 @@ page {
 /*默认紫暂无*/
 /*默认黑*/
 /*默认白*/
-.moreList.data-v-c90964dc {
+.moreList.data-v-f78fe856 {
   padding: 0 20rpx;
   background: #fff;
 }
-.moreList .item.data-v-c90964dc {
+.moreList .item.data-v-f78fe856 {
     height: 90rpx;
     line-height: 90rpx;
     display: -webkit-box;
@@ -84,7 +84,7 @@ page {
             justify-content: space-between;
     border-bottom: 2rpx solid #f2f2f2;
 }
-.moreList .item .icon.data-v-c90964dc {
+.moreList .item .icon.data-v-f78fe856 {
       width: 30rpx;
       height: 30rpx;
       float: right;

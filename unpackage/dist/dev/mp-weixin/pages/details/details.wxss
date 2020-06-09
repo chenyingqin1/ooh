@@ -66,24 +66,24 @@ page {
 /*默认紫暂无*/
 /*默认黑*/
 /*默认白*/
-.detailsInfo.data-v-57a18010 {
+.detailsInfo.data-v-0fb2000a {
   margin-bottom: 40rpx;
   padding-left: 20rpx;
   background: #fff;
 }
-.detailsInfo .title.data-v-57a18010 {
+.detailsInfo .title.data-v-0fb2000a {
     color: #398188;
     padding-bottom: 10rpx;
     border-bottom: 4rpx solid #358086;
 }
-.detailsInfo .title view.data-v-57a18010 {
+.detailsInfo .title view.data-v-0fb2000a {
       line-height: 50rpx;
 }
-.detailsInfo .title .name.data-v-57a18010 {
+.detailsInfo .title .name.data-v-0fb2000a {
       padding-top: 15rpx;
       font-weight: bold;
 }
-.detailsInfo .title .time.data-v-57a18010 {
+.detailsInfo .title .time.data-v-0fb2000a {
       display: -webkit-box;
       display: -webkit-flex;
       display: flex;
@@ -94,7 +94,7 @@ page {
       -webkit-justify-content: space-between;
               justify-content: space-between;
 }
-.detailsInfo .title .time .state.data-v-57a18010 {
+.detailsInfo .title .time .state.data-v-0fb2000a {
         display: -webkit-box;
         display: -webkit-flex;
         display: flex;
@@ -102,41 +102,41 @@ page {
         -webkit-justify-content: space-between;
                 justify-content: space-between;
 }
-.detailsInfo .title .time .state .fei.data-v-57a18010 {
+.detailsInfo .title .time .state .fei.data-v-0fb2000a {
           width: 55rpx;
           height: 55rpx;
           margin-right: 30rpx;
 }
-.detailsInfo .title .time .state .stateNane.data-v-57a18010 {
+.detailsInfo .title .time .state .stateNane.data-v-0fb2000a {
           border-radius: 40rpx 0 0 40rpx;
           background: #465761;
           color: #fff;
           padding: 13rpx 20rpx 13rpx 25rpx;
 }
-.detailsInfo .info.data-v-57a18010 {
+.detailsInfo .info.data-v-0fb2000a {
     padding: 10rpx 0;
 }
-.detailsInfo .info view.data-v-57a18010 {
+.detailsInfo .info view.data-v-0fb2000a {
       line-height: 50rpx;
       color: #9b9b9b;
 }
-.monitorStage.data-v-57a18010 {
+.monitorStage.data-v-0fb2000a {
   padding: 0 20rpx;
   background: #fff;
 }
-.monitorStage .condition .title.data-v-57a18010 {
+.monitorStage .condition .title.data-v-0fb2000a {
     color: #a4a4a6;
     height: 90rpx;
     line-height: 90rpx;
     font-weight: bold;
 }
-.monitorStage .condition .content.data-v-57a18010 {
+.monitorStage .condition .content.data-v-0fb2000a {
     padding-bottom: 40rpx;
 }
-.monitorStage .condition .content .tab.data-v-57a18010:nth-of-type(4n) {
+.monitorStage .condition .content .tab.data-v-0fb2000a:nth-of-type(4n) {
       margin-right: 0;
 }
-.monitorStage .condition .content .tab .n.data-v-57a18010 {
+.monitorStage .condition .content .tab .n.data-v-0fb2000a {
       display: inline-block;
       text-align: center;
       padding: 15rpx 0;
@@ -147,18 +147,18 @@ page {
       border-radius: 12rpx;
       margin-bottom: 10rpx;
 }
-.monitorStage .condition .content .tab .t.data-v-57a18010 {
+.monitorStage .condition .content .tab .t.data-v-0fb2000a {
       font-size: 24rpx;
       color: #9b9b9b;
 }
-.monitorStage .condition .content .tab.cur .n.data-v-57a18010 {
+.monitorStage .condition .content .tab.cur .n.data-v-0fb2000a {
       background: #39828b;
       color: #fff;
 }
-.monitorStage .condition .content .timeBox.data-v-57a18010 {
+.monitorStage .condition .content .timeBox.data-v-0fb2000a {
       position: relative;
 }
-.monitorStage .condition .content .timeBox .eliminate.data-v-57a18010 {
+.monitorStage .condition .content .timeBox .eliminate.data-v-0fb2000a {
         position: absolute;
         top: -15rpx;
         right: -15rpx;
@@ -167,41 +167,41 @@ page {
         background: url(https://oohmonitoring.dentsuaegis.cn:8081/images/OSicons/close-fill.png) no-repeat center center;
         background-size: 100% 100%;
 }
-.monitorStage .condition .content .p.data-v-57a18010 {
+.monitorStage .condition .content .p.data-v-0fb2000a {
       width: 100%;
       margin: 0 0 30rpx 0;
 }
-.monitorStage .condition .content .time.data-v-57a18010 {
+.monitorStage .condition .content .time.data-v-0fb2000a {
       height: 60rpx;
       line-height: 60rpx;
       margin-right: 0;
 }
-.monitorStage .condition .content .i.data-v-57a18010 {
+.monitorStage .condition .content .i.data-v-0fb2000a {
       padding: 0 30rpx;
       height: 70rpx;
       line-height: 70rpx;
 }
-.monitorStage .condition .content .switch.data-v-57a18010 {
+.monitorStage .condition .content .switch.data-v-0fb2000a {
       float: right;
       padding-top: 10rpx;
       color: #a4a4a6;
       font-size: 24rpx;
 }
-.monitorStage .condition .content .fileList .item.data-v-57a18010 {
+.monitorStage .condition .content .fileList .item.data-v-0fb2000a {
       width: 22.75%;
       margin: 10rpx 3% 0 0;
       text-align: center;
       float: left;
 }
-.monitorStage .condition .content .fileList .item.data-v-57a18010:nth-of-type(4n) {
+.monitorStage .condition .content .fileList .item.data-v-0fb2000a:nth-of-type(4n) {
         margin-right: 0;
 }
-.monitorStage .condition .content .fileList .item .name.data-v-57a18010 {
+.monitorStage .condition .content .fileList .item .name.data-v-0fb2000a {
         color: #9f9f9f;
         margin-bottom: 10rpx;
         font-size: 24rpx;
 }
-.monitorStage .condition .content .fileList .item .file.data-v-57a18010 {
+.monitorStage .condition .content .fileList .item .file.data-v-0fb2000a {
         width: 100%;
         height: 160rpx;
         border: 2rpx solid #d1d1d1;
@@ -210,11 +210,11 @@ page {
         overflow: hidden;
         position: relative;
 }
-.monitorStage .condition .content .fileList .item .file .img.data-v-57a18010 {
+.monitorStage .condition .content .fileList .item .file .img.data-v-0fb2000a {
           width: 100%;
           height: 100%;
 }
-.monitorStage .condition .content .fileList .item .file .reviewed.data-v-57a18010 {
+.monitorStage .condition .content .fileList .item .file .reviewed.data-v-0fb2000a {
           position: absolute;
           top: 4rpx;
           right: 4rpx;
@@ -224,14 +224,14 @@ page {
           font-size: 24rpx;
           border-radius: 20rpx;
 }
-.monitorStage .condition .content .fileList .item .file .icon.data-v-57a18010 {
+.monitorStage .condition .content .fileList .item .file .icon.data-v-0fb2000a {
           position: absolute;
           top: 4rpx;
           right: 4rpx;
           width: 40rpx;
           height: 40rpx;
 }
-.but.data-v-57a18010 {
+.but.data-v-0fb2000a {
   height: 80rpx;
   line-height: 80rpx;
   background: #388188;

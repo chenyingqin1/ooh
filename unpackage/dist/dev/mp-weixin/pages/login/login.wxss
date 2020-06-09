@@ -66,19 +66,19 @@ page {
 /*默认紫暂无*/
 /*默认黑*/
 /*默认白*/
-page.data-v-f9c0ef74 {
+page.data-v-2fa5c1c9 {
   width: 100%;
   height: 100%;
 }
-.welcomePage.data-v-f9c0ef74 {
+.welcomePage.data-v-2fa5c1c9 {
   width: 100%;
   height: 100%;
   background: #fff;
 }
-.welcomePage image.data-v-f9c0ef74 {
+.welcomePage image.data-v-2fa5c1c9 {
     width: 100%;
 }
-.signBox.data-v-f9c0ef74 {
+.signBox.data-v-2fa5c1c9 {
   height: 100%;
   display: -webkit-box;
   display: -webkit-flex;
@@ -90,17 +90,17 @@ page.data-v-f9c0ef74 {
   padding: 0;
   box-sizing: border-box;
 }
-.signBox .loginBg.data-v-f9c0ef74 {
+.signBox .loginBg.data-v-2fa5c1c9 {
     -webkit-box-flex: 0;
     -webkit-flex: none;
             flex: none;
     margin: 80rpx auto;
 }
-.signBox .loginBg .img.data-v-f9c0ef74 {
+.signBox .loginBg .img.data-v-2fa5c1c9 {
       height: 134rpx;
       width: 437rpx;
 }
-.signBox .loginInfo .list.data-v-f9c0ef74 {
+.signBox .loginInfo .list.data-v-2fa5c1c9 {
     width: 95%;
     position: relative;
     margin: 0 auto 50rpx;
@@ -109,14 +109,14 @@ page.data-v-f9c0ef74 {
     overflow: hidden;
     padding: 15rpx 0;
 }
-.signBox .loginInfo .list .input.data-v-f9c0ef74 {
+.signBox .loginInfo .list .input.data-v-2fa5c1c9 {
       width: 100%;
       display: block;
       height: 30rpx;
       line-height: 30rpx;
       padding-left: 80rpx;
 }
-.signBox .loginInfo .list .icon.data-v-f9c0ef74 {
+.signBox .loginInfo .list .icon.data-v-2fa5c1c9 {
       height: 30rpx;
       width: 30rpx;
       position: absolute;
@@ -125,7 +125,7 @@ page.data-v-f9c0ef74 {
       -webkit-transform: translateY(-50%);
               transform: translateY(-50%);
 }
-.signBox .loginBtn.data-v-f9c0ef74 {
+.signBox .loginBtn.data-v-2fa5c1c9 {
     margin-top: 110rpx;
     width: 95%;
     border-radius: 8rpx;
