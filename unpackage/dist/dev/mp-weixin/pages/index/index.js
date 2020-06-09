@@ -423,9 +423,9 @@ var _config = _interopRequireDefault(__webpack_require__(/*! @/common/config.js 
       }
     },
     // 去详情
-    goDetails: function goDetails() {
+    goDetails: function goDetails(item) {
       uni.navigateTo({
-        url: "/pages/details/details" });
+        url: "/pages/details/details?id=" + item.id });
 
     },
     // 搜索条件收缩

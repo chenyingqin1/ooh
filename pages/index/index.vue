@@ -11,7 +11,7 @@
 		<view style="height: 90rpx;"></view>
 		<scroll-view class="scroll" :scroll-y="true" :style="{height: systemInfo.windowHeight-50 +'px'}" :enable-back-to-top="true" refresher-enabled="true" :refresher-triggered="triggered" @refresherrefresh="onRefresh" @scrolltolower="updateRefresh" @refresherrestore="onRestore" >
 			<view class="listWrap" v-if="taskList.length > 0">
-				<view class="block" @click="goDetails" v-for="(item,index) in taskList" :key='index'>
+				<view class="block" @click="goDetails(item)" v-for="(item,index) in taskList" :key='index'>
 					<view class="title">
 						<view class="name">任务名称：{{item.name}}</view>
 						<view class="time">
@@ -261,9 +261,9 @@
 				}
 			},
 			// 去详情
-			goDetails(){
+			goDetails(item){
 				uni.navigateTo({
-				    url: "/pages/details/details"
+				    url: "/pages/details/details?id=" + item.id
 				})
 			},
 			// 搜索条件收缩

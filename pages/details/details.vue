@@ -3,16 +3,18 @@
 		<view class="contentBox">
 			<view class="detailsInfo">
 				<view class="title">
-					<view class="name">任务名称：2018-coke-地铁测试-上海-1</view>
+					<view class="name">任务名称：{{taskDetail.name}}</view>
 					<view class="time">
-						<view>2018-05-15 至 2018-05-20</view>
+						<view>{{taskDetail.startDate}} 至 {{taskDetail.endDate}}</view>
 					</view>
 				</view>
 				<view class="info">
-					<view>媒体规格：Bus Shelter</view>
-					<view>媒体规格：Bus Shelter</view>
-					<view>任务地址：黄剖南路</view>
-					<view>活动名称：地铁测试</view>
+					<view>广告主：{{item.client}}</view>
+					<view>品牌：{{item.brandName}}</view>
+					<view>媒体规格：{{item.mediaName}}</view>
+					<view>任务地址：{{item.location}}</view>
+					<view>活动名称：{{item.campaignName}}</view>
+					<view>说明：{{item.description}}</view>
 				</view>
 			</view>
 			<view class="monitorStage">
@@ -21,7 +23,6 @@
 					<view class="content clearfloat">
 						<view class="tab cur" >
 							<view class="n">上刊（2）</view>
-							<!-- <view class="t">{{journaldata.time}}</view> -->
 						</view>
 						<view class="fileList clearfloat">
 							<view class="item">
@@ -102,7 +103,9 @@
 		},
 		data() {
 			return {
+				options:null,
 				currentIndex: 0,
+				taskDetail:{},
 				journalList: [{
 					'name': '上刊（2）',
 					'time': '05.01-05.01'
@@ -120,13 +123,16 @@
 			}
 		},
 		computed: {
-		
+			userLogin() {
+				return this.$store.state.userLogin.userLogin
+			},
 		},
 		onShow: function() {
 			
 		},
 		onLoad: function(options) {
-			
+			this.options = options;
+			this.getData();
 		},
 		onReady: function() {
 			
@@ -151,6 +157,62 @@
 			
 		},
 		methods: {
+			getData(){
+				new Promise(resolve => {
+					let parms = ',"openid":"' + this.userLogin.user.openid + '"},"spotFileQuery":{"pageNo":"1","pageSize":"12","keyword":"","taskId":"' + this.options.id + '"}';
+					this.$store.dispatch('myList/getTaskfileList', {parms,
+						callback: (res1) => {
+							console.log(res1);
+							if (res1.errorCode == 0) {
+								let data = res1.spotFileResult.spotFiles;
+								resolve(data)
+							}else{
+								uni.showToast({
+									title: res1.errorMsg,
+									icon: 'none',
+									mask: true
+								})
+							}
+						},
+					})
+				}).then(res1 => {
+					let parms = '},"taskQuery":{"taskId":' + this.options.id + '}';
+					this.$store.dispatch('details/getTaskDetail', {parms,
+						callback: (res2) => {
+							console.log(res2);
+							if (res2.errorCode == 0) {
+								let data = res2.taskResult.tasks[0];
+								for(let i=0; i<data.monitorStages.length; i++){
+									data.monitorStages[i].spotFiles = []
+									for(let s=0; s<data.monitorStages[i].value2; s++){
+										let index = s+1;
+										data.monitorStages[i].spotFiles.push({
+											"spotClassType": index,
+											"spotClassTypeName": "图片" + index,
+										})
+									}
+									for(let z=0; z<data.monitorStages[i].spotFiles.length; z++){
+										for(let j=0; j<res1.length; j++){
+											if(data.monitorStages[i].displayName == res1[j].monitorStageName && data.monitorStages[i].spotClassTypeName == data.monitorStages[i].spotFiles[z].spotClassTypeName){
+												data.monitorStages.spotFiles.push(res1[j])
+											}
+										}
+									}
+								}
+								console.log(data)
+								this.taskDetail = data;
+							}else{
+								uni.showToast({
+									title: res2.errorMsg,
+									icon: 'none',
+									mask: true
+								})
+							}
+						},
+					})
+				})
+				
+			},
 			tabChange(index){
 				this.currentIndex = index;
 			},

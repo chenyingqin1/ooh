@@ -5,6 +5,7 @@ import userLogin from './userLogin_ST.js'
 import home from './home_ST.js'
 import myList from './myList_ST.js'
 import speed from './speed_ST.js'
+import details from './details_ST.js'
 Vue.use(Vuex)
 
 let store = new Vuex.Store({
@@ -15,7 +16,8 @@ let store = new Vuex.Store({
 		userLogin,
 		home,
 		myList,
-		speed
+		speed,
+		details
 	},
 	mutations: {
 		
@@ -28,4 +30,5 @@ store.dispatch("userLogin/init")
 store.dispatch("home/init")
 store.dispatch("myList/init")
 store.dispatch("speed/init")
+store.dispatch("details/init")
 export default store

@@ -1,5 +1,1 @@
-<<<<<<< HEAD
 <view class="page data-v-2306dcd5"><view class="explain data-v-2306dcd5">【说明】<view class="_br data-v-2306dcd5"></view>若网络或GPS信号不稳定时，则默认该定位地址</view><view data-event-opts="{{[['tap',[['outLogin',['$event']]]]]}}" class="outLogin data-v-2306dcd5" bindtap="__e">获取定位</view></view>
-=======
-<view class="page data-v-39a3bccc"><view class="explain data-v-39a3bccc">【说明】<view class="_br data-v-39a3bccc"></view>若网络或GPS信号不稳定时，则默认该定位地址</view><view data-event-opts="{{[['tap',[['outLogin',['$event']]]]]}}" class="outLogin data-v-39a3bccc" bindtap="__e">获取定位</view></view>
->>>>>>> edb68f4dd087977d73b70d31134f1dfa433d5d83

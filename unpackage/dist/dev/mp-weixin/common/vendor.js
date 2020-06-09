@@ -13690,7 +13690,8 @@ var _vuex = _interopRequireDefault(__webpack_require__(/*! vuex */ 17));
 var _userLogin_ST = _interopRequireDefault(__webpack_require__(/*! ./userLogin_ST.js */ 57));
 var _home_ST = _interopRequireDefault(__webpack_require__(/*! ./home_ST.js */ 58));
 var _myList_ST = _interopRequireDefault(__webpack_require__(/*! ./myList_ST.js */ 59));
-var _speed_ST = _interopRequireDefault(__webpack_require__(/*! ./speed_ST.js */ 60));function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
+var _speed_ST = _interopRequireDefault(__webpack_require__(/*! ./speed_ST.js */ 60));
+var _details_ST = _interopRequireDefault(__webpack_require__(/*! ./details_ST.js */ 205));function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
 _vue.default.use(_vuex.default);
 
 var store = new _vuex.default.Store({
@@ -13701,7 +13702,8 @@ var store = new _vuex.default.Store({
     userLogin: _userLogin_ST.default,
     home: _home_ST.default,
     myList: _myList_ST.default,
-    speed: _speed_ST.default },
+    speed: _speed_ST.default,
+    details: _details_ST.default },
 
   mutations: {},
 
@@ -13713,7 +13715,8 @@ var store = new _vuex.default.Store({
 store.dispatch("userLogin/init");
 store.dispatch("home/init");
 store.dispatch("myList/init");
-store.dispatch("speed/init");var _default =
+store.dispatch("speed/init");
+store.dispatch("details/init");var _default =
 store;exports.default = _default;
 
 /***/ }),
@@ -15432,6 +15435,70 @@ var calendar = {
 
 
 calendar;exports.default = _default;
+
+/***/ }),
+/* 181 */,
+/* 182 */,
+/* 183 */,
+/* 184 */,
+/* 185 */,
+/* 186 */,
+/* 187 */,
+/* 188 */,
+/* 189 */,
+/* 190 */,
+/* 191 */,
+/* 192 */,
+/* 193 */,
+/* 194 */,
+/* 195 */,
+/* 196 */,
+/* 197 */,
+/* 198 */,
+/* 199 */,
+/* 200 */,
+/* 201 */,
+/* 202 */,
+/* 203 */,
+/* 204 */,
+/* 205 */
+/*!**************************************!*\
+  !*** D:/git/OOH/store/details_ST.js ***!
+  \**************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(uni) {Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var _vue = _interopRequireDefault(__webpack_require__(/*! vue */ 2));
+var _request_UT = __webpack_require__(/*! @/util/request_UT.js */ 13);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}var _default =
+{
+  namespaced: true,
+  state: {
+    taskDetailInfo: {} },
+
+  mutations: {
+    init: function init(state, data) {
+
+    },
+    setTaskDetail: function setTaskDetail(state, data) {
+      _vue.default.set(state, 'taskDetailInfo', data);
+      uni.setStorageSync('taskDetailInfo', state);
+    } },
+
+  actions: {
+    init: function init(context, data) {
+      context.commit("init");
+    },
+    getTaskDetail: function getTaskDetail(context, data) {
+      (0, _request_UT.getFetch)('task.detail.query', data.parms, function (data2) {
+        var val = data2.data;
+        context.commit("setTaskDetail", val);
+        if (data.callback) {
+          data.callback(val);
+        }
+      });
+    } } };exports.default = _default;
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 1)["default"]))
 
 /***/ })
 ]]);
