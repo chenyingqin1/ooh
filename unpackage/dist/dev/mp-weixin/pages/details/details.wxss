@@ -231,6 +231,15 @@ page {
           width: 40rpx;
           height: 40rpx;
 }
+.monitorStage .condition .content .fileList .item .file .video.data-v-0fb2000a {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          -webkit-transform: translate(-50%, -50%);
+                  transform: translate(-50%, -50%);
+          width: 60rpx;
+          height: 60rpx;
+}
 .but.data-v-0fb2000a {
   height: 80rpx;
   line-height: 80rpx;

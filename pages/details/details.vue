@@ -9,63 +9,49 @@
 					</view>
 				</view>
 				<view class="info">
-					<view>广告主：{{item.client}}</view>
-					<view>品牌：{{item.brandName}}</view>
-					<view>媒体规格：{{item.mediaName}}</view>
-					<view>任务地址：{{item.location}}</view>
-					<view>活动名称：{{item.campaignName}}</view>
-					<view>说明：{{item.description}}</view>
+					<view>广告主：{{taskDetail.client}}</view>
+					<view>品牌：{{taskDetail.brandName}}</view>
+					<view>媒体规格：{{taskDetail.mediaName}}</view>
+					<view>任务地址：{{taskDetail.location}}</view>
+					<view>活动名称：{{taskDetail.campaignName}}</view>
+					<view>说明：{{taskDetail.description}}</view>
 				</view>
 			</view>
 			<view class="monitorStage">
 				<view class="condition">
 					<view class="title">监播阶段</view>
-					<view class="content clearfloat">
-						<view class="tab cur" >
-							<view class="n">上刊（2）</view>
-						</view>
-						<view class="fileList clearfloat">
-							<view class="item">
-								<view class="name">图片1</view>
-								<view class="file">
-									<text class="reviewed">已审</text>
-									<!-- <image class="icon" mode="widthFix" src="https://oohmonitoring.dentsuaegis.cn:8081/images/icons/del.png"> -->
-									<image class="img" mode="aspectFill" src="https://oohmonitoring.dentsuaegis.cn:8081/images/OSicons/detail-example.jpg">
-								</view>
+					<block v-for="(item, index) in taskDetail.monitorStages" :key="index">
+						<view class="content clearfloat">
+							<view class="tab" :class="{cur: currentIndex == index}" @click="tabChange(index)">
+								<view class="n">{{item.displayName}}<block v-if="item.value != '0'">（{{item.value}})</block></view>
 							</view>
-							<view class="item clearfloat">
-								<view class="name">图片2</view>
-								<view class="file">
-									<image class="icon" mode="widthFix" src="https://oohmonitoring.dentsuaegis.cn:8081/images/icons/lock.png">
-									<image class="img" mode="aspectFill" src="https://oohmonitoring.dentsuaegis.cn:8081/images/OSicons/detail-example.jpg">
-								</view>
-							</view>
-							<view class="item clearfloat">
-								<view class="name">图片2</view>
-								<view class="file">
-									<image class="icon" mode="widthFix" src="https://oohmonitoring.dentsuaegis.cn:8081/images/icons/lock.png">
-									<image class="img" mode="aspectFill" src="https://oohmonitoring.dentsuaegis.cn:8081/images/OSicons/detail-example.jpg">
-								</view>
-							</view>
-							<view class="item clearfloat">
-								<view class="name">图片3</view>
-								<view class="file" @click="goPhotoSubmission(false)">
-									
+							<view class="fileList clearfloat" v-if="currentIndex == index">
+								<view class="item" v-for="(v, i) in item.spotFiles" :key="i">
+									<view class="name">{{v.spotClassTypeName}}</view>
+									<view class="file">
+										<text class="reviewed" v-if="v.status == 3">已审</text>
+										<image class="icon" mode="widthFix" v-if="v.status == 1" src="https://oohmonitoring.dentsuaegis.cn:8081/images/icons/lock.png">
+										<image class="icon" mode="widthFix" v-if="v.status == -1" src="https://oohmonitoring.dentsuaegis.cn:8081/images/icons/del.png">
+										<image class="img" mode="aspectFill" v-if="v.fileUrl && v.spotClassTypeName.indexOf('图片') != -1" :src="v.fileUrl">
+										<video class="img" v-if="v.spotClassTypeName == '视频'" :controls="false" :src="v.fileUrl"></video>
+										<image class="video" v-if="v.spotClassTypeName == '视频'" src="https://oohmonitoring.dentsuaegis.cn:8081/images/icons/icon_play.png">
+									</view>
 								</view>
 							</view>
 						</view>
-					</view>
-					<view class="content clearfloat">
+					</block>
+					
+					<!-- <view class="content clearfloat">
 						<view class="tab" >
 							<view class="n">下刊</view>
-							<!-- <view class="t">{{journaldata.time}}</view> -->
+							<view class="t">{{journaldata.time}}</view>
 						</view>
 						<view class="fileList clearfloat">
 							<view class="item">
 								<view class="name">图片1</view>
 								<view class="file">
 									<text class="reviewed">已审</text>
-									<!-- <image class="icon" mode="widthFix" src="https://oohmonitoring.dentsuaegis.cn:8081/images/icons/del.png"> -->
+									<image class="icon" mode="widthFix" src="https://oohmonitoring.dentsuaegis.cn:8081/images/icons/del.png">
 									<image class="img" mode="aspectFill" src="https://oohmonitoring.dentsuaegis.cn:8081/images/OSicons/detail-example.jpg">
 								</view>
 							</view>
@@ -83,7 +69,7 @@
 								</view>
 							</view>
 						</view>
-					</view>
+					</view> -->
 				</view>
 			</view>
 		</view>
@@ -104,7 +90,7 @@
 		data() {
 			return {
 				options:null,
-				currentIndex: 0,
+				currentIndex: null,
 				taskDetail:{},
 				journalList: [{
 					'name': '上刊（2）',
@@ -160,7 +146,7 @@
 			getData(){
 				new Promise(resolve => {
 					let parms = ',"openid":"' + this.userLogin.user.openid + '"},"spotFileQuery":{"pageNo":"1","pageSize":"12","keyword":"","taskId":"' + this.options.id + '"}';
-					this.$store.dispatch('myList/getTaskfileList', {parms,
+					this.$store.dispatch('myList/getSpotFilesList', {parms,
 						callback: (res1) => {
 							console.log(res1);
 							if (res1.errorCode == 0) {
@@ -183,6 +169,9 @@
 							if (res2.errorCode == 0) {
 								let data = res2.taskResult.tasks[0];
 								for(let i=0; i<data.monitorStages.length; i++){
+									if(data.monitorStages[i].IsEnabled){
+										this.currentIndex = i;
+									}
 									data.monitorStages[i].spotFiles = []
 									for(let s=0; s<data.monitorStages[i].value2; s++){
 										let index = s+1;
@@ -191,10 +180,14 @@
 											"spotClassTypeName": "图片" + index,
 										})
 									}
+									data.monitorStages[i].spotFiles.push({
+										"spotClassType": Number(data.monitorStages[i].value2) + 1,
+										"spotClassTypeName": "视频",
+									})
 									for(let z=0; z<data.monitorStages[i].spotFiles.length; z++){
 										for(let j=0; j<res1.length; j++){
-											if(data.monitorStages[i].displayName == res1[j].monitorStageName && data.monitorStages[i].spotClassTypeName == data.monitorStages[i].spotFiles[z].spotClassTypeName){
-												data.monitorStages.spotFiles.push(res1[j])
+											if(data.monitorStages[i].displayName == res1[j].monitorStageName && data.monitorStages[i].spotFiles[z].spotClassTypeName == res1[j].spotClassTypeName){
+												data.monitorStages[i].spotFiles[z] = res1[j]
 											}
 										}
 									}

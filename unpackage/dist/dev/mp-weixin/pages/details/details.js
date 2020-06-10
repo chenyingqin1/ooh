@@ -100,6 +100,29 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
+  var l1 = _vm.__map(_vm.taskDetail.monitorStages, function(item, index) {
+    var l0 = _vm.__map(item.spotFiles, function(v, i) {
+      var g0 = v.spotClassTypeName.indexOf("图片")
+      return {
+        $orig: _vm.__get_orig(v),
+        g0: g0
+      }
+    })
+
+    return {
+      $orig: _vm.__get_orig(item),
+      l0: l0
+    }
+  })
+
+  _vm.$mp.data = Object.assign(
+    {},
+    {
+      $root: {
+        l1: l1
+      }
+    }
+  )
 }
 var recyclableRender = false
 var staticRenderFns = []
@@ -134,20 +157,6 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(uni) {Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -306,30 +315,37 @@ var _allPage_MX = _interopRequireDefault(__webpack_require__(/*! @/mixin/allPage
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-var _default = { mixins: [_allPage_MX.default], components: {}, beforeCreate: function beforeCreate() {}, data: function data() {return { options: null, currentIndex: 0, taskDetail: {}, journalList: [{ 'name': '上刊（2）', 'time': '05.01-05.01' }, { 'name': '监播1', 'time': '05.01-05.02' }, { 'name': '监播2', 'time': '05.01-05.03' }, { 'name': '下刊', 'time': '05.01-05.04' }], showList: ['中国', '美国', '巴西', '日本'] };}, computed: { userLogin: function userLogin() {return this.$store.state.userLogin.userLogin;} }, onShow: function onShow() {}, onLoad: function onLoad(options) {this.options = options;this.getData();}, onReady: function onReady() {}, onHide: function onHide(options) {}, onReachBottom: function onReachBottom(options) {}, onPullDownRefresh: function onPullDownRefresh() {}, mounted: function mounted() {}, watch: {}, onPageScroll: function onPageScroll(e) {}, methods: { getData: function getData() {var _this = this;new Promise(function (resolve) {var parms = ',"openid":"' + _this.userLogin.user.openid + '"},"spotFileQuery":{"pageNo":"1","pageSize":"12","keyword":"","taskId":"' + _this.options.id + '"}';_this.$store.dispatch('myList/getTaskfileList', { parms: parms, callback: function callback(res1) {console.log(res1);if (res1.errorCode == 0) {var data = res1.spotFileResult.spotFiles;resolve(data);} else {uni.showToast({ title: res1.errorMsg, icon: 'none', mask: true });}} });}).then(function (res1) {var parms = '},"taskQuery":{"taskId":' + _this.options.id + '}';_this.$store.dispatch('details/getTaskDetail', { parms: parms, callback: function callback(res2) {console.log(res2);if (res2.errorCode == 0) {var data = res2.taskResult.tasks[0];for (var i = 0; i < data.monitorStages.length; i++) {data.monitorStages[i].spotFiles = [];for (var s = 0; s < data.monitorStages[i].value2; s++) {var index = s + 1;
+var _default = { mixins: [_allPage_MX.default], components: {}, beforeCreate: function beforeCreate() {}, data: function data() {return { options: null, currentIndex: null, taskDetail: {}, journalList: [{ 'name': '上刊（2）', 'time': '05.01-05.01' }, { 'name': '监播1', 'time': '05.01-05.02' }, { 'name': '监播2', 'time': '05.01-05.03' }, { 'name': '下刊', 'time': '05.01-05.04' }], showList: ['中国', '美国', '巴西', '日本'] };}, computed: { userLogin: function userLogin() {return this.$store.state.userLogin.userLogin;} }, onShow: function onShow() {}, onLoad: function onLoad(options) {this.options = options;this.getData();}, onReady: function onReady() {}, onHide: function onHide(options) {}, onReachBottom: function onReachBottom(options) {}, onPullDownRefresh: function onPullDownRefresh() {}, mounted: function mounted() {}, watch: {}, onPageScroll: function onPageScroll(e) {}, methods: { getData: function getData() {var _this = this;new Promise(function (resolve) {var parms = ',"openid":"' + _this.userLogin.user.openid + '"},"spotFileQuery":{"pageNo":"1","pageSize":"12","keyword":"","taskId":"' + _this.options.id + '"}';_this.$store.dispatch('myList/getSpotFilesList', { parms: parms, callback: function callback(res1) {console.log(res1);if (res1.errorCode == 0) {var data = res1.spotFileResult.spotFiles;resolve(data);} else {uni.showToast({ title: res1.errorMsg, icon: 'none', mask: true });
+            }
+          } });
+
+      }).then(function (res1) {
+        var parms = '},"taskQuery":{"taskId":' + _this.options.id + '}';
+        _this.$store.dispatch('details/getTaskDetail', { parms: parms,
+          callback: function callback(res2) {
+            console.log(res2);
+            if (res2.errorCode == 0) {
+              var data = res2.taskResult.tasks[0];
+              for (var i = 0; i < data.monitorStages.length; i++) {
+                if (data.monitorStages[i].IsEnabled) {
+                  _this.currentIndex = i;
+                }
+                data.monitorStages[i].spotFiles = [];
+                for (var s = 0; s < data.monitorStages[i].value2; s++) {
+                  var index = s + 1;
                   data.monitorStages[i].spotFiles.push({
                     "spotClassType": index,
                     "spotClassTypeName": "图片" + index });
 
                 }
+                data.monitorStages[i].spotFiles.push({
+                  "spotClassType": Number(data.monitorStages[i].value2) + 1,
+                  "spotClassTypeName": "视频" });
+
                 for (var z = 0; z < data.monitorStages[i].spotFiles.length; z++) {
                   for (var j = 0; j < res1.length; j++) {
-                    if (data.monitorStages[i].displayName == res1[j].monitorStageName && data.monitorStages[i].spotClassTypeName == data.monitorStages[i].spotFiles[z].spotClassTypeName) {
-                      data.monitorStages.spotFiles.push(res1[j]);
+                    if (data.monitorStages[i].displayName == res1[j].monitorStageName && data.monitorStages[i].spotFiles[z].spotClassTypeName == res1[j].spotClassTypeName) {
+                      data.monitorStages[i].spotFiles[z] = res1[j];
                     }
                   }
                 }
