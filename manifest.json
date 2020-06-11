@@ -61,7 +61,8 @@
             "urlCheck" : true,
             "es6" : true,
             "postcss" : true,
-            "minified" : true
+            "minified" : true,
+			"checkSiteMap" : false
         },
         "usingComponents" : true,
         "permission" : {
@@ -69,7 +70,6 @@
                 "desc" : "用于为你推荐更精准的产品信息"
             }
         },
-        "navigateToMiniProgramAppIdList" : [],
         "plugins" : {}
     },
     "mp-alipay" : {

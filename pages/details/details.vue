@@ -28,15 +28,15 @@
 							<view class="fileList clearfloat" v-show="currentIndex == index">
 								<view class="item" v-for="(v, i) in item.spotFiles" :key="i">
 									<view class="name">{{v.spotClassTypeName}}</view>
-									<view class="file" @click="previewImage(v, i)">
-										<text class="reviewed" v-if="v.status == 1">已审</text>
-										<text class="isImgLists" v-if="v.imgList.length > 1"></text>
-										<image class="icon" mode="widthFix" v-if="v.status == 1" src="https://oohmonitoring.dentsuaegis.cn:8081/images/icons/lock.png">
-										<image class="icon" mode="widthFix" v-if="v.status != 1" src="https://oohmonitoring.dentsuaegis.cn:8081/images/icons/yun.png">
-										<image class="icon y" mode="widthFix" v-if="v.status == 0" src="https://oohmonitoring.dentsuaegis.cn:8081/images/icons/del.png">
+									<view class="file" @click="operationImage(item, v, i)">
 										<block v-if="v.fileUrl">
+											<text class="reviewed" v-if="v.status == 1">已审</text>
+											<text class="isImgLists" v-if="v.imgList.length > 1"></text>
+											<image class="icon" mode="widthFix" v-if="v.status == 1" src="https://oohmonitoring.dentsuaegis.cn:8081/images/icons/lock.png">
+											<image class="icon y" mode="widthFix" v-if="v.status != 1" src="https://oohmonitoring.dentsuaegis.cn:8081/images/icons/yun.png">
+											<image class="icon" mode="widthFix" v-if="v.status == 0" src="https://oohmonitoring.dentsuaegis.cn:8081/images/icons/del.png">
 											<image class="img" mode="aspectFill" v-if="v.fileUrl && v.spotClassTypeName.indexOf('图片') != -1" :src="v.fileUrl">
-											<video class="img" :id="'myvideo' + i" v-if="v.spotClassTypeName == '视频'" :controls="false" bindended="endAction" :src="v.fileUrl"></video>
+											<video class="img" :custom-cache="false" :id="'myvideo' + i" v-if="v.spotClassTypeName == '视频'" :show-center-play-btn="false" :controls="controls" bindended="endAction" :src="v.fileUrl"></video>
 											<image class="video" v-if="v.spotClassTypeName == '视频'" src="https://oohmonitoring.dentsuaegis.cn:8081/images/icons/icon_play.png">
 										</block>
 									</view>
@@ -63,9 +63,10 @@
 		},
 		data() {
 			return {
-				options:null,
+				options: null,
 				currentIndex: null,
-				taskDetail:{},
+				taskDetail: {},
+				controls: false,
 				journalList: [{
 					'name': '上刊（2）',
 					'time': '05.01-05.01'
@@ -124,6 +125,11 @@
 						console.log(res2);
 						if (res2.errorCode == 0) {
 							let data = res2.taskResult.tasks[0];
+							for(let i=0; i<data.monitorStages.length; i++){
+								if(data.monitorStages[i].IsEnabled == true){
+									this.currentIndex = i;
+								}
+							}
 							this.taskDetail = data;
 						}else{
 							uni.showToast({
@@ -135,32 +141,36 @@
 					},
 				})
 			},
-			// 图片预览
-			previewImage(item, index){
-				// if(item.status == 1){
-					if(item.spotClassTypeName == '视频'){
+			// 图片/视频点击
+			operationImage(item, v, index){
+				console.log(v)
+				// if(!item.IsEnabled){
+				// 	return false;
+				// }
+				if(v.status == 1){
+					if(v.spotClassTypeName == '视频'){
+						this.controls = true;
 						let id = 'myvideo'+index;
 						let videoContext = wx.createVideoContext(id, this);
-					　　	videoContext.requestFullScreen();//执行全屏方法
+						videoContext.requestFullScreen();//执行全屏方法
 					}else{
-						wx.previewImage({
-						  current: item.fileUrl,
+						uni.previewImage({
+							urls: [v.fileUrl],
+							current: 0
 						})
 					}
-				// }
-			},
-			// 退出全屏
-			endAction(){
-				
-			},
+				}else{
+					this.$store.state.details.seleSpotFile = v; //选中的文件信息
+					let isFile = v.fileUrl ? false : true;
+					let cameraType = v.spotClassTypeName == '视频' ? 1 : 2;
+					uni.navigateTo({
+					    url: "/pages/photoSubmission/photoSubmission?implement=" + isFile + "&cameraType=" + cameraType
+					})
+				}
+			},	
 			tabChange(index){
 				this.currentIndex = index;
 			},
-			goPhotoSubmission(cameraType){
-				uni.navigateTo({
-				    url: "/pages/photoSubmission/photoSubmission?cameraType=" + cameraType + "&implement=1"
-				})
-			}
 		},
 	}
 </script>

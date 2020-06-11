@@ -53,7 +53,9 @@
 			font-weight: bold;
 		}
 		.content{
-			padding-bottom: 40rpx;
+			padding-bottom: 20rpx;
+			margin-bottom: 20rpx;
+			border-bottom: 1px solid #f5f5f5;
 			.tab{
 				&:nth-of-type(4n){
 					margin-right: 0;
@@ -154,6 +156,7 @@
 							right: 4rpx;
 							width: 40rpx;
 							height: 40rpx;
+							z-index: 9;
 							&.y{
 								top: auto;
 								right: auto;

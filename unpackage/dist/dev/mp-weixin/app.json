@@ -56,8 +56,6 @@
       "desc": "用于为你推荐更精准的产品信息"
     }
   },
-  "navigateToMiniProgramAppIdList": [],
   "plugins": {},
-  "usingComponents": {},
-  "sitemapLocation": "sitemap43.json"
+  "usingComponents": {}
 }

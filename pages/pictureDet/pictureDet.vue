@@ -89,8 +89,8 @@
 			// 图片浏览
 			flieBrowse(){
 				uni.previewImage({
-					current: this.SelectTempFlie.url, // 当前显示图片的http链接
-					// urls: imgList // 需要预览的图片http链接列表
+					urls: [this.SelectTempFlie.url],
+					current: 0
 				})
 			},
 		},
