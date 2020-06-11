@@ -231,6 +231,12 @@ page {
           width: 40rpx;
           height: 40rpx;
 }
+.monitorStage .condition .content .fileList .item .file .icon.y.data-v-0fb2000a {
+            top: auto;
+            right: auto;
+            left: 4rpx;
+            bottom: 4rpx;
+}
 .monitorStage .condition .content .fileList .item .file .video.data-v-0fb2000a {
           position: absolute;
           top: 50%;
@@ -239,6 +245,15 @@ page {
                   transform: translate(-50%, -50%);
           width: 60rpx;
           height: 60rpx;
+}
+.monitorStage .condition .content .fileList .item .file .isImgLists.data-v-0fb2000a {
+          position: absolute;
+          top: 4rpx;
+          left: 4rpx;
+          width: 20rpx;
+          height: 20rpx;
+          background: red;
+          border-radius: 100%;
 }
 .but.data-v-0fb2000a {
   height: 80rpx;

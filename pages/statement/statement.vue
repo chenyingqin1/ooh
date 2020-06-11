@@ -14,7 +14,7 @@
 				则，电通安吉斯将依法追究法律责任。
 			</view>
 		</view>
-	</view>
+	</view>	
 </template>
 <script>
 	import allPage from "@/mixin/allPage_MX";

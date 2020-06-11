@@ -25,51 +25,25 @@
 							<view class="tab" :class="{cur: currentIndex == index}" @click="tabChange(index)">
 								<view class="n">{{item.displayName}}<block v-if="item.value != '0'">（{{item.value}})</block></view>
 							</view>
-							<view class="fileList clearfloat" v-if="currentIndex == index">
+							<view class="fileList clearfloat" v-show="currentIndex == index">
 								<view class="item" v-for="(v, i) in item.spotFiles" :key="i">
 									<view class="name">{{v.spotClassTypeName}}</view>
-									<view class="file">
-										<text class="reviewed" v-if="v.status == 3">已审</text>
+									<view class="file" @click="previewImage(v, i)">
+										<text class="reviewed" v-if="v.status == 1">已审</text>
+										<text class="isImgLists" v-if="v.imgList.length > 1"></text>
 										<image class="icon" mode="widthFix" v-if="v.status == 1" src="https://oohmonitoring.dentsuaegis.cn:8081/images/icons/lock.png">
-										<image class="icon" mode="widthFix" v-if="v.status == -1" src="https://oohmonitoring.dentsuaegis.cn:8081/images/icons/del.png">
-										<image class="img" mode="aspectFill" v-if="v.fileUrl && v.spotClassTypeName.indexOf('图片') != -1" :src="v.fileUrl">
-										<video class="img" v-if="v.spotClassTypeName == '视频'" :controls="false" :src="v.fileUrl"></video>
-										<image class="video" v-if="v.spotClassTypeName == '视频'" src="https://oohmonitoring.dentsuaegis.cn:8081/images/icons/icon_play.png">
+										<image class="icon" mode="widthFix" v-if="v.status != 1" src="https://oohmonitoring.dentsuaegis.cn:8081/images/icons/yun.png">
+										<image class="icon y" mode="widthFix" v-if="v.status == 0" src="https://oohmonitoring.dentsuaegis.cn:8081/images/icons/del.png">
+										<block v-if="v.fileUrl">
+											<image class="img" mode="aspectFill" v-if="v.fileUrl && v.spotClassTypeName.indexOf('图片') != -1" :src="v.fileUrl">
+											<video class="img" :id="'myvideo' + i" v-if="v.spotClassTypeName == '视频'" :controls="false" bindended="endAction" :src="v.fileUrl"></video>
+											<image class="video" v-if="v.spotClassTypeName == '视频'" src="https://oohmonitoring.dentsuaegis.cn:8081/images/icons/icon_play.png">
+										</block>
 									</view>
 								</view>
 							</view>
 						</view>
 					</block>
-					
-					<!-- <view class="content clearfloat">
-						<view class="tab" >
-							<view class="n">下刊</view>
-							<view class="t">{{journaldata.time}}</view>
-						</view>
-						<view class="fileList clearfloat">
-							<view class="item">
-								<view class="name">图片1</view>
-								<view class="file">
-									<text class="reviewed">已审</text>
-									<image class="icon" mode="widthFix" src="https://oohmonitoring.dentsuaegis.cn:8081/images/icons/del.png">
-									<image class="img" mode="aspectFill" src="https://oohmonitoring.dentsuaegis.cn:8081/images/OSicons/detail-example.jpg">
-								</view>
-							</view>
-							<view class="item clearfloat">
-								<view class="name">图片2</view>
-								<view class="file">
-									<image class="icon" mode="widthFix" src="https://oohmonitoring.dentsuaegis.cn:8081/images/icons/lock.png">
-									<image class="img" mode="aspectFill" src="https://oohmonitoring.dentsuaegis.cn:8081/images/OSicons/detail-example.jpg">
-								</view>
-							</view>
-							<view class="item clearfloat">
-								<view class="name">图片3</view>
-								<view class="file" @click="goPhotoSubmission(true)">
-									
-								</view>
-							</view>
-						</view>
-					</view> -->
 				</view>
 			</view>
 		</view>
@@ -144,66 +118,39 @@
 		},
 		methods: {
 			getData(){
-				new Promise(resolve => {
-					let parms = ',"openid":"' + this.userLogin.user.openid + '"},"spotFileQuery":{"pageNo":"1","pageSize":"12","keyword":"","taskId":"' + this.options.id + '"}';
-					this.$store.dispatch('myList/getSpotFilesList', {parms,
-						callback: (res1) => {
-							console.log(res1);
-							if (res1.errorCode == 0) {
-								let data = res1.spotFileResult.spotFiles;
-								resolve(data)
-							}else{
-								uni.showToast({
-									title: res1.errorMsg,
-									icon: 'none',
-									mask: true
-								})
-							}
-						},
-					})
-				}).then(res1 => {
-					let parms = '},"taskQuery":{"taskId":' + this.options.id + '}';
-					this.$store.dispatch('details/getTaskDetail', {parms,
-						callback: (res2) => {
-							console.log(res2);
-							if (res2.errorCode == 0) {
-								let data = res2.taskResult.tasks[0];
-								for(let i=0; i<data.monitorStages.length; i++){
-									if(data.monitorStages[i].IsEnabled){
-										this.currentIndex = i;
-									}
-									data.monitorStages[i].spotFiles = []
-									for(let s=0; s<data.monitorStages[i].value2; s++){
-										let index = s+1;
-										data.monitorStages[i].spotFiles.push({
-											"spotClassType": index,
-											"spotClassTypeName": "图片" + index,
-										})
-									}
-									data.monitorStages[i].spotFiles.push({
-										"spotClassType": Number(data.monitorStages[i].value2) + 1,
-										"spotClassTypeName": "视频",
-									})
-									for(let z=0; z<data.monitorStages[i].spotFiles.length; z++){
-										for(let j=0; j<res1.length; j++){
-											if(data.monitorStages[i].displayName == res1[j].monitorStageName && data.monitorStages[i].spotFiles[z].spotClassTypeName == res1[j].spotClassTypeName){
-												data.monitorStages[i].spotFiles[z] = res1[j]
-											}
-										}
-									}
-								}
-								console.log(data)
-								this.taskDetail = data;
-							}else{
-								uni.showToast({
-									title: res2.errorMsg,
-									icon: 'none',
-									mask: true
-								})
-							}
-						},
-					})
+				let parms = ',"openid":"' + this.userLogin.user.openid + '"},"taskQuery":{"taskId":' + this.options.id + '}';
+				this.$store.dispatch('details/getTaskDetail', {parms,
+					callback: (res2) => {
+						console.log(res2);
+						if (res2.errorCode == 0) {
+							let data = res2.taskResult.tasks[0];
+							this.taskDetail = data;
+						}else{
+							uni.showToast({
+								title: res2.errorMsg,
+								icon: 'none',
+								mask: true
+							})
+						}
+					},
 				})
+			},
+			// 图片预览
+			previewImage(item, index){
+				// if(item.status == 1){
+					if(item.spotClassTypeName == '视频'){
+						let id = 'myvideo'+index;
+						let videoContext = wx.createVideoContext(id, this);
+					　　	videoContext.requestFullScreen();//执行全屏方法
+					}else{
+						wx.previewImage({
+						  current: item.fileUrl,
+						})
+					}
+				// }
+			},
+			// 退出全屏
+			endAction(){
 				
 			},
 			tabChange(index){
