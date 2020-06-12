@@ -46,16 +46,25 @@ export default {
 		},
 		// 文件信息暂存
 		taskfileSave(context, data){
-			getFetch('spot.taskfile.save', data.parms, (data2) => {
+			postFetch('spot.taskfile.save', data.parms, (data2) => {
 				let val = data2.data;
 				if(data.callback){
 					data.callback(val);
 				}
 			});
 		},
-		// 删除图片视频
+		// 删除文件信息
 		fileDelete(context, data){
-			getFetch('spot.taskfile.delete', data.parms, (data2) => {
+			getFetch('spot.file.delete', data.parms, (data2) => {
+				let val = data2.data;
+				if(data.callback){
+					data.callback(val);
+				}
+			});
+		},
+		// 更新文件状态
+		taskfileUpdateStatus(context, data){
+			getFetch('spot.taskfile.updateStatus', data.parms, (data2) => {
 				let val = data2.data;
 				if(data.callback){
 					data.callback(val);

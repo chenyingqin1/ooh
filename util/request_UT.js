@@ -22,10 +22,6 @@ export const getFetch =  async (method, parm, callback, inparm) => {
 		}
 		let sign = md5.hex_md5(config.sumbitUrl + "?" + "method=" + method + "&appkey=" + config.appkey + "&ts=" + ts);
 		let id = utils.guid();
-		// let parms = parm;
-		// if (parms != '') {
-		//   parms = "," + parms;
-		// }
 		let data;
 		if(method == 'user.login'){
 			data = '{"id": "' + id + '",' + parm + '}';
@@ -62,34 +58,42 @@ export const getFetch =  async (method, parm, callback, inparm) => {
 	}
 };
 
-export const postFetch =  async (method, parm, callback) => {
+export const postFetch =  async (method, parm, callback, inparm) => {
 	try{
 		let ts = utils.getTimestamp();
-		if(uni.getStorageSync('userLogin')){
-			let uid = uni.getStorageSync('userLogin').userLogin.user.uid;
-		}else{
-			uni.reLaunch({
-				url: '/pages/login/login'
-			})
-			return false;
+		let uid;
+		if(method != 'user.login'){
+			if(uni.getStorageSync('userLogin')){
+				uid = uni.getStorageSync('userLogin').userLogin.user.uid;
+			}else{
+				uni.reLaunch({
+					url: '/pages/login/login'
+				})
+				return false;
+			}
 		}
 		let sign = md5.hex_md5(config.sumbitUrl + "?" + "method=" + method + "&appkey=" + config.appkey + "&ts=" + ts);
 		let id = utils.guid();
-		let parms = parm;
-		if (parms != '') {
-		  parms = "," + parms;
+		let data;
+		if(method == 'user.login'){
+			data = '{"id": "' + id + '",' + parm + '}';
+		}else{
+			data = '{"id": "' + id + '","user": {"uid": "' + uid + '"' + parm + '}';
 		}
-		let data = '{"id": "' + id + '","user": {"uid": "' + uid + '" }' + parms + '}';
+		let header = {
+			"method": method,
+			"appkey": config.appkey,
+			"ts": ts,
+			"sign": sign,
+			"data": data,
+		}
+		if(inparm){
+			header = Object.assign(header, inparm)
+		}
 		const res = await uni.request({
 			url: config.sumbitUrl,
 			method:'POST',
-			data: {
-				"method": method,
-				"appkey": config.appkey,
-				"ts": ts,
-				"sign": sign,
-				"data": data
-			},
+			data: header,
 			success: (data) => {
 				callback(data);
 			},

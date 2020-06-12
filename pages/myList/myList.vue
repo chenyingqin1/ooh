@@ -33,7 +33,7 @@
 						</view>
 						<view class="block1" @click="goPictureDet(item)" v-if="present">
 							<view class="state">
-								<text class="stateNane">待发送</text>
+								<text class="stateNane">{{item.status | statusName}}</text>
 							</view>
 							<view class="checkBox s" :class="{cur:item.checkBox}" @click.stop="selectCh(index)"></view>
 							<image class="img" mode="aspectFill" v-if="item.spotClassTypeName.indexOf('图片') != -1" :src="item.fileUrl">

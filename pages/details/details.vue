@@ -28,13 +28,12 @@
 							<view class="fileList clearfloat" v-show="currentIndex == index">
 								<view class="item" v-for="(v, i) in item.spotFiles" :key="i">
 									<view class="name">{{v.spotClassTypeName}}</view>
-									<view class="file" @click="operationImage(item, v, i)">
+									<view class="file" :class="{cur:v.fileUrl}" @click="operationImage(item, v, i)">
 										<block v-if="v.fileUrl">
 											<text class="reviewed" v-if="v.status == 1">已审</text>
 											<text class="isImgLists" v-if="v.imgList.length > 1"></text>
-											<image class="icon" mode="widthFix" v-if="v.status == 1" src="https://oohmonitoring.dentsuaegis.cn:8081/images/icons/lock.png">
-											<image class="icon y" mode="widthFix" v-if="v.status != 1" src="https://oohmonitoring.dentsuaegis.cn:8081/images/icons/yun.png">
-											<image class="icon" mode="widthFix" v-if="v.status == 0" src="https://oohmonitoring.dentsuaegis.cn:8081/images/icons/del.png">
+											<image class="icon y" mode="widthFix" v-if="v.status == 0" src="https://oohmonitoring.dentsuaegis.cn:8081/images/icons/yun.png">
+											<image class="icon" mode="widthFix" @click.stop="deleteCh(item, v)" v-if="v.status == 0 || v.status == -1 || v.status == -2" src="https://oohmonitoring.dentsuaegis.cn:8081/images/icons/del.png">
 											<image class="img" mode="aspectFill" v-if="v.fileUrl && v.spotClassTypeName.indexOf('图片') != -1" :src="v.fileUrl">
 											<video class="img" :custom-cache="false" :id="'myvideo' + i" v-if="v.spotClassTypeName == '视频'" :show-center-play-btn="false" :controls="controls" bindended="endAction" :src="v.fileUrl"></video>
 											<image class="video" v-if="v.spotClassTypeName == '视频'" src="https://oohmonitoring.dentsuaegis.cn:8081/images/icons/icon_play.png">
@@ -89,11 +88,10 @@
 			},
 		},
 		onShow: function() {
-			
+			this.getData();
 		},
 		onLoad: function(options) {
 			this.options = options;
-			this.getData();
 		},
 		onReady: function() {
 			
@@ -140,6 +138,37 @@
 						}
 					},
 				})
+			},
+			// 删除
+			deleteCh(item, v){
+				console.log(item)
+				// if(!item.IsEnabled){
+				// 	return false;
+				// }
+				uni.showModal({
+					cancelText:'确定',  
+					confirmText:'取消',  
+					content: '确定删除该文件吗？',  
+					success: (res) => {  
+						if (!res.confirm) {  
+							if(v.status == -1 || v.status == -2){
+								let parms = ',"openid":"' + this.userLogin.user.openid + '"},"spotFile":{"taskId":' + v.taskId + ', "spotClassType":' + v.spotClassType + ', "monitorStage":' + v.monitorStage + '}';
+								this.$store.dispatch('myList/taskfileDelete', {parms,
+									callback: (res) => {
+										this.getData()
+									},
+								})
+							}else if(v.status == 0){
+								let parms = '},"spotFile":{"id":' + v.id + '}';
+								this.$store.dispatch('details/fileDelete', {parms,
+									callback: (res) => {
+										this.getData()
+									},
+								})
+							}
+						}  
+					}  
+				}) 
 			},
 			// 图片/视频点击
 			operationImage(item, v, index){

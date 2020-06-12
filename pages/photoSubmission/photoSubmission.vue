@@ -3,7 +3,7 @@
 		<view class="imgInfo">
 			<view class="imgList">
 				<view class="list">
-					<view class="name">拍摄时间 {{selectTempFlie.shootTime}}</view>
+					<view class="name">拍摄时间 {{selectTempFlie.shootTime?timestampToTime(selectTempFlie.shootTime):''}}</view>
 					<scroll-view :scroll-x="true">
 						<view class="imgBox" :class="{cur:selectImgIndex == index}" v-for="(item, index) in spareFlie" :key="index">
 							<image class="img" v-if="options.cameraType == '2'"  @click="selectImgCh(index)" @longpress="longpressCh(index)" :src="item.fileUrl">
@@ -28,8 +28,9 @@
 <script>
 	import allPage from "@/mixin/allPage_MX";
 	import util from '@/common/util.js'
+	import publicCheck from "@/mixin/publicCheck_MX.js";
 	export default {
-		mixins: [allPage],
+		mixins: [allPage,publicCheck],
 		components: {
 			
 		},
@@ -70,6 +71,7 @@
 				for(let i=0; i<this.seleSpotFile.imgList.length; i++){
 					if(this.seleSpotFile.imgList[i].isSelect){
 						this.selectTempFlie = this.seleSpotFile.imgList[i];
+						this.selectImgIndex = i;
 					}
 				}
 				console.log(this.selectTempFlie)
@@ -146,19 +148,11 @@
 				console.log(this.spareFlie)
 				new Promise(resolve => {
 					// 先删除已存的所有图片
-					let parms = ',"openid":"' + this.userLogin.user.openid + '"},"spotFile":{"taskId":' + this.seleSpotFile.taskId + '}';
-					this.$store.dispatch('details/fileDelete', {parms,
+					let parms = ',"openid":"' + this.userLogin.user.openid + '"},"spotFile":{"taskId":' + this.seleSpotFile.taskId + ', "spotClassType":' + this.seleSpotFile.spotClassType + ', "monitorStage":' + this.seleSpotFile.monitorStage + '}';
+					this.$store.dispatch('myList/taskfileDelete', {parms,
 						callback: (res1) => {
 							console.log(res1);
-							// if (res1.errorCode == 0) {
-								resolve(res1)
-							// }else{
-							// 	uni.showToast({
-							// 		title: res1.errorMsg,
-							// 		icon: 'none',
-							// 		mask: true
-							// 	})
-							// }
+							resolve(res1)
 						},
 					})
 				}).then(res => {
@@ -171,10 +165,11 @@
 						callback: (res2) => {
 							console.log(res2);
 							if (res2.errorCode == 0) {
-								uni.showToast({
-									title: res2.errorMsg,
-									icon: 'success',
-									mask: true
+								wx.navigateBack({
+									delta: 1,  // 返回上一级页面。
+									success: function() {
+										console.log('成功！')
+									}
 								})
 							}else{
 								uni.showToast({
@@ -187,7 +182,6 @@
 						},
 					})
 				})
-				
 			},
 			chooseWxImageVideo(){
 				var _this = this;
@@ -204,11 +198,11 @@
 								console.log(res2)
 								if(res2.errorCode == 0){
 									for(let i=0; i<_this.spareFlie.length; i++){
-										_this.spareFlie[i].isSelect = false;
+										_this.spareFlie[i].isSelect= false;
 									}
 									let commonList = {
 										taskId: _this.seleSpotFile.taskId,
-										shootTime: _this.getCurrentTime(),
+										shootTime: _this.dateToUnix(_this.getCurrentTime()),
 										lat: res1.latitude,
 										lon: res1.longitude,
 										location: res2.spotLocation,
@@ -228,13 +222,12 @@
 												console.log(res3);
 												_this.spareFlie.unshift({
 													...commonList,
-													fileType: 'png',
 													fileUrl: res3.tempFiles[0].path,
 													thumbnailUrl: res3.tempFiles[0].path,
 													fileSize: res3.tempFiles[0].size,
 												})
 												_this.selectTempFlie = _this.spareFlie[0];
-												console.log(_this.spareFlie)
+												console.log(_this.selectTempFlie)
 											}
 										})
 									}else{ // 视频功能
@@ -246,7 +239,6 @@
 												console.log(res3)
 												_this.spareFlie.unshift({
 													...commonList,
-													fileType: 'png',
 													fileUrl: res3.tempFilePath,
 													thumbnailUrl: res3.tempFilePath,
 													fileSize: res3.size,

@@ -113,6 +113,9 @@
 			systemInfo() {
 				return this.$store.state.userLogin.systemInfo
 			},
+			userLogin() {
+				return this.$store.state.userLogin.userLogin
+			},
 			startDateEliminate(){
 				if(this.startDate){
 					return true
@@ -192,7 +195,7 @@
 						}
 					}
 				}
-				let parms = '},"taskQuery":{"pageNo":' + pageNo + ',"pageSize":' + pageSize + ',"keyword":"' + searchKey + '" ' + startDateStr + endDateStr + ',"campaigns":[' + campaigns.substring(0,campaigns.length-1) + '],"cities":[' + cities.substring(0,cities.length-1) + '],"medias":[' + medias.substring(0,medias.length-1) + '],"brands":[' + brands.substring(0,brands.length-1) + '],"Campaigntypes":[' + campaigntypes.substring(0,campaigntypes.length-1) + '],"Clients":[' + clients.substring(0,clients.length-1) + '],"type":"' + type + '"}';
+				let parms = ',"openid":"' + this.userLogin.user.openid + '"},"taskQuery":{"pageNo":' + pageNo + ',"pageSize":' + pageSize + ',"keyword":"' + searchKey + '" ' + startDateStr + endDateStr + ',"campaigns":[' + campaigns.substring(0,campaigns.length-1) + '],"cities":[' + cities.substring(0,cities.length-1) + '],"medias":[' + medias.substring(0,medias.length-1) + '],"brands":[' + brands.substring(0,brands.length-1) + '],"Campaigntypes":[' + campaigntypes.substring(0,campaigntypes.length-1) + '],"Clients":[' + clients.substring(0,clients.length-1) + '],"type":"' + type + '"}';
 				this.$store.dispatch('home/getTaskList', {parms,
 					callback: (res) => {
 						console.log(res);
