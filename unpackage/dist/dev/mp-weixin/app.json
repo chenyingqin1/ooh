@@ -57,5 +57,6 @@
     }
   },
   "plugins": {},
-  "usingComponents": {}
+  "usingComponents": {},
+  "sitemapLocation": "sitemap97.json"
 }

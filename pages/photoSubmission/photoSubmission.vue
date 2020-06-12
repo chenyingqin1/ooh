@@ -146,25 +146,28 @@
 				console.log(this.spareFlie)
 				new Promise(resolve => {
 					// 先删除已存的所有图片
-					let parms = '},"spotFile":{"taskId":' + this.seleSpotFile.taskId + '}';
+					let parms = ',"openid":"' + this.userLogin.user.openid + '"},"spotFile":{"taskId":' + this.seleSpotFile.taskId + '}';
 					this.$store.dispatch('details/fileDelete', {parms,
 						callback: (res1) => {
 							console.log(res1);
-							if (res1.errorCode == 0) {
+							// if (res1.errorCode == 0) {
 								resolve(res1)
-							}else{
-								uni.showToast({
-									title: res1.errorMsg,
-									icon: 'none',
-									mask: true
-								})
-							}
+							// }else{
+							// 	uni.showToast({
+							// 		title: res1.errorMsg,
+							// 		icon: 'none',
+							// 		mask: true
+							// 	})
+							// }
 						},
 					})
 				}).then(res => {
 					// 重新提交现所有的图片
+					uni.showLoading({
+						title: '提交中'
+					});
 					let parms = ',"openid":"' + this.userLogin.user.openid + '"},"spotFiles":'+ JSON.stringify(this.spareFlie) + '';
-					this.$store.dispatch('details/fileDelete', {parms,
+					this.$store.dispatch('details/taskfileSave', {parms,
 						callback: (res2) => {
 							console.log(res2);
 							if (res2.errorCode == 0) {
@@ -180,6 +183,7 @@
 									mask: true
 								})
 							}
+							uni.hideLoading();
 						},
 					})
 				})
@@ -218,7 +222,7 @@
 									}
 									if(_this.options.cameraType == 2){ // 拍照功能
 										uni.chooseImage({
-											sizeType: ['original'],
+											sizeType: ['original','compressed'],
 											sourceType: ['camera'],
 											success: function(res3) {
 												console.log(res3);

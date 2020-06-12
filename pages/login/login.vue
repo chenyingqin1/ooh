@@ -77,7 +77,9 @@
 								});
 								return false;
 							}
-							
+							uni.showLoading({
+								title: '登录中..'
+							});
 							let password = md5.hex_md5(_this.loginPsw);
 							password = password.toUpperCase();
 							let parms = '"applyType":"1","JsCode":"' + res.code + '","user": {"loginName" : "' + _this.loginName + '","password" : "' + password + '"}'
@@ -99,6 +101,7 @@
 										icon: 'none',
 										mask: true
 									})
+									uni.hideLoading();
 									uni.switchTab({
 									    url: '/pages/index/index'
 									});

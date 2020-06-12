@@ -17,7 +17,7 @@
 								<view class="name">
 									<view>品牌：{{item.brandName}}</view>
 									<view class="state">
-										<text class="stateNane">待发送</text>
+										<text class="stateNane">{{item.status | statusName}}</text>
 									</view>
 								</view>
 								<view class="time">任务名称：{{item.taskName}}</view>
@@ -99,12 +99,19 @@
 				present: false,
 				pageNo: 1,
 				pageSize: 12,
+				statusName: '',
 				taskfileList: [],
 				spotFilesList: [],
 				selectAllCheck: false,
 				selectData: [],
 				triggered: false,
 				updateLock: false,
+			}
+		},
+		filters: {
+			statusName: function(state) {
+				return state == -1 ? "待发送" :
+					state == -2 ? "发送失败" : ""
 			}
 		},
 		computed: {

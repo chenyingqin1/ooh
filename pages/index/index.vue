@@ -17,7 +17,7 @@
 						<view class="time">
 							<view>{{item.startDate}} 至 {{item.endDate}}</view>
 							<view class="state">
-								<!-- <image class="fei" src="https://oohmonitoring.dentsuaegis.cn:8081/images/icons/send.png"> -->
+								<image class="fei" v-if="item.status2 == 1" src="https://oohmonitoring.dentsuaegis.cn:8081/images/icons/send.png">
 								<text class="stateNane">{{item.status | statusName}}</text>
 							</view>
 						</view>

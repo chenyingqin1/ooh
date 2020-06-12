@@ -55,7 +55,7 @@ export default {
 		},
 		// 删除图片视频
 		fileDelete(context, data){
-			getFetch('spot.file.delete', data.parms, (data2) => {
+			getFetch('spot.taskfile.delete', data.parms, (data2) => {
 				let val = data2.data;
 				if(data.callback){
 					data.callback(val);
