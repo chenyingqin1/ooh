@@ -73,7 +73,7 @@ module.exports = {
             return true;
         },
 		timestampToTime(timestamp){
-			let date = new Date(Number(timestamp) * 1000);//时间戳为10位需*1000，时间戳为13位的话不需乘1000
+			let date = new Date(Number(timestamp));//时间戳为10位需*1000，时间戳为13位的话不需乘1000
 			let Y = date.getFullYear();
 			let M = date.getMonth()+1;
 			let D = date.getDate();
@@ -85,6 +85,7 @@ module.exports = {
 		add(m) {
 			return m<10?'0'+m:m;
 		},
+		// 文件大小转换
 		getFileSize(fileByte){
 		    var fileSizeByte = fileByte;
 		    var fileSizeMsg = "";
@@ -95,7 +96,21 @@ module.exports = {
 		    else if (fileSizeByte > 1073741824 && fileSizeByte < 1099511627776) fileSizeMsg = (fileSizeByte / (1024 * 1024 * 1024)).toFixed(2) + "GB";
 		    else fileSizeMsg = "文件超过1TB";
 		    return fileSizeMsg;
-		}
+		},
+		// 时间转时间戳
+		dateToUnix(string) {
+			let f = string.split(' ', 2);
+			let d = (f[0] ? f[0] : '').split('-', 3);
+			let t = (f[1] ? f[1] : '').split(':', 3);
+			return (new Date(
+				parseInt(d[0], 10) || null,
+				(parseInt(d[1], 10) || 1) - 1,
+				parseInt(d[2], 10) || null,
+				parseInt(t[0], 10) || null,
+				parseInt(t[1], 10) || null,
+				parseInt(t[2], 10) || null
+				)).getTime();
+		},
 	},
 	computed:{
 
