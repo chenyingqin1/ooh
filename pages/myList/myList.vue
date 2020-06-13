@@ -166,6 +166,15 @@
 								data[i].checkBox = false;
 							}
 							this.taskfileList.push(...data)
+							// 我的清单右上角添加文本
+							uni.setStorageSync('taskfileListNumber', this.taskfileList.length);
+							if(wx.getStorageSync("taskfileListNumber")){
+								let taskfileListNumber = wx.getStorageSync("taskfileListNumber");
+								uni.setTabBarBadge({//tabbar右上角添加文本
+									index: 1,
+									text: String(taskfileListNumber)
+								})
+							}
 							if(data.length){
 								this.updateLock = false;
 							}
@@ -340,42 +349,30 @@
 					});
 					return false;
 				}
-				uni.showLoading({
-					title: '提交中..'
-				});
-				let bl = false;
+				uni.showToast({
+					title: '提交中，请勿关闭当前页面',
+					icon: 'none',
+					mask: true
+				})
 				console.log(this.selectData)
 				for(let i=0; i<this.selectData.length; i++){ 
 					let item = this.selectData[i];
 					let parms = '},"spotFile":{"verificationCode":"' + md5.hex_md5(item.fileUrl) + '","taskId":"' + item.taskId + '","shootTime":"' + item.shootTime + '","lat":"' + item.lat + '","lon":"' + item.lon + '","location":"' + item.location + '","monitorStage":"' + item.monitorStage + '","spotClassType":"' + item.spotClassType + '","fileType":"' + item.fileType + '","description":"' + item.description + '","phoneSystem":"' + item.phoneSystem + '","phoneSystemVersion":"' + item.phoneSystemVersion + '","phoneModel":"' + item.phoneModel + '"}';
-					let inparm = {
-						spotfile: item.fileUrl,
-					}
-					this.$store.dispatch('myList/spotFileUploadAll', {parms,
+					let fileUrl = item.fileUrl;
+					this.$store.dispatch('myList/spotFileUploadAll', {parms, fileUrl,
 						callback: (res) => {
 							console.log(res);
+							res = JSON.parse(res)
 							if (res.errorCode != 0) {
 								uni.showToast({
 									title: res.errorMsg,
 									icon: 'none',
 									mask: true
 								})
-								bl = true;
 							}
-						},inparm
-					})
-					if(bl){
-						break;
-					}
-				}
-				if(!bl){
-					uni.showToast({
-						title: '提交成功',
-						icon: 'none',
-						mask: true
+						}
 					})
 				}
-				uni.hideLoading();
 			}
 		},
 

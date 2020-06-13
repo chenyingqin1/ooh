@@ -66,7 +66,7 @@ page {
 /*默认紫暂无*/
 /*默认黑*/
 /*默认白*/
-.header.data-v-3e58cb09 {
+.header.data-v-1db66696 {
   height: 100rpx;
   background: #f8f8f8;
   padding: 10rpx;
@@ -86,114 +86,114 @@ page {
   border-top: 2rpx solid #ebebeb;
   z-index: 9;
 }
-.header .tab.data-v-3e58cb09 {
-  display: inline-block;
-  border: 4rpx solid #388188;
-  border-radius: 12rpx;
+.header .tab.data-v-1db66696 {
+    display: inline-block;
+    border: 4rpx solid #388188;
+    border-radius: 12rpx;
 }
-.header .tab view.data-v-3e58cb09 {
-  padding: 15rpx 35rpx;
-  display: inline-block;
-  color: #388188;
+.header .tab view.data-v-1db66696 {
+      padding: 15rpx 35rpx;
+      display: inline-block;
+      color: #388188;
 }
-.header .tab view.cur.data-v-3e58cb09 {
-  background: #388188;
-  color: #fff;
+.header .tab view.cur.data-v-1db66696 {
+        background: #388188;
+        color: #fff;
 }
-.header .icon.data-v-3e58cb09 {
-  position: absolute;
-  right: 20rpx;
-  top: 50%;
-  -webkit-transform: translateY(-50%);
-          transform: translateY(-50%);
-  width: 54rpx;
-  height: 42rpx;
-  background: url(https://oohmonitoring.dentsuaegis.cn:8081/images/OSicons/list-text-switch.png) no-repeat center center;
-  background-size: 100% 100%;
+.header .icon.data-v-1db66696 {
+    position: absolute;
+    right: 20rpx;
+    top: 50%;
+    -webkit-transform: translateY(-50%);
+            transform: translateY(-50%);
+    width: 54rpx;
+    height: 42rpx;
+    background: url(https://oohmonitoring.dentsuaegis.cn:8081/images/OSicons/list-text-switch.png) no-repeat center center;
+    background-size: 100% 100%;
 }
-.header .icon.cur.data-v-3e58cb09 {
-  background-image: url(https://oohmonitoring.dentsuaegis.cn:8081/images/OSicons/list-img-switch.png);
+.header .icon.cur.data-v-1db66696 {
+      background-image: url(https://oohmonitoring.dentsuaegis.cn:8081/images/OSicons/list-img-switch.png);
 }
-.listWrap.cur.data-v-3e58cb09 {
+.listWrap.cur.data-v-1db66696 {
   padding: 0 30rpx 30rpx;
 }
-.listWrap .item.data-v-3e58cb09 {
+.listWrap .item.data-v-1db66696 {
   background: #fff;
   border-radius: 10rpx;
   margin-bottom: 10rpx;
 }
-.listWrap .item.cur.data-v-3e58cb09 {
-  background: none;
-  border-radius: 0;
-  margin-bottom: 0;
-  width: 48%;
-  margin: 0 4% 30rpx 0;
-  position: relative;
-  display: inline-block;
+.listWrap .item.cur.data-v-1db66696 {
+    background: none;
+    border-radius: 0;
+    margin-bottom: 0;
+    width: 48%;
+    margin: 0 4% 30rpx 0;
+    position: relative;
+    display: inline-block;
 }
-.listWrap .item.cur.data-v-3e58cb09:nth-of-type(2n) {
-  margin-right: 0;
+.listWrap .item.cur.data-v-1db66696:nth-of-type(2n) {
+      margin-right: 0;
 }
-.listWrap .block.data-v-3e58cb09 {
+.listWrap .block.data-v-1db66696 {
   margin: 0 0 20rpx 90rpx;
   padding-left: 20rpx;
   position: relative;
 }
-.listWrap .block.cur.data-v-3e58cb09 {
-  margin: 0 0 20rpx 0;
+.listWrap .block.cur.data-v-1db66696 {
+    margin: 0 0 20rpx 0;
 }
-.listWrap .block .title.data-v-3e58cb09 {
-  color: #398188;
-  padding: 10rpx 0;
-  border-bottom: 4rpx solid #358086;
+.listWrap .block .title.data-v-1db66696 {
+    color: #398188;
+    padding: 10rpx 0;
+    border-bottom: 4rpx solid #358086;
 }
-.listWrap .block .title view.data-v-3e58cb09 {
-  line-height: 50rpx;
+.listWrap .block .title view.data-v-1db66696 {
+      line-height: 50rpx;
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: flex;
+      -webkit-box-align: center;
+      -webkit-align-items: center;
+              align-items: center;
+      -webkit-box-pack: justify;
+      -webkit-justify-content: space-between;
+              justify-content: space-between;
+}
+.listWrap .block .title .name.data-v-1db66696 {
+      font-weight: bold;
+}
+.listWrap .block .info.data-v-1db66696 {
+    padding: 10rpx 0;
+}
+.listWrap .block .info view.data-v-1db66696 {
+      line-height: 50rpx;
+      color: #9b9b9b;
+}
+.listWrap .state.data-v-1db66696 {
   display: -webkit-box;
   display: -webkit-flex;
   display: flex;
-  -webkit-box-align: center;
-  -webkit-align-items: center;
-          align-items: center;
   -webkit-box-pack: justify;
   -webkit-justify-content: space-between;
           justify-content: space-between;
 }
-.listWrap .block .title .name.data-v-3e58cb09 {
-  font-weight: bold;
+.listWrap .state .stateNane.data-v-1db66696 {
+    border-radius: 40rpx 0 0 40rpx;
+    background: #fbb323;
+    color: #fff;
+    padding: 15rpx 20rpx 15rpx 25rpx;
 }
-.listWrap .block .info.data-v-3e58cb09 {
-  padding: 10rpx 0;
-}
-.listWrap .block .info view.data-v-3e58cb09 {
-  line-height: 50rpx;
-  color: #9b9b9b;
-}
-.listWrap .state.data-v-3e58cb09 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: flex;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-          justify-content: space-between;
-}
-.listWrap .state .stateNane.data-v-3e58cb09 {
-  border-radius: 40rpx 0 0 40rpx;
-  background: #fbb323;
-  color: #fff;
-  padding: 15rpx 20rpx 15rpx 25rpx;
-}
-.listWrap .block1 .img.data-v-3e58cb09 {
+.listWrap .block1 .img.data-v-1db66696 {
   width: 100%;
   height: 300rpx;
 }
-.listWrap .block1 .state.data-v-3e58cb09 {
+.listWrap .block1 .state.data-v-1db66696 {
   position: absolute;
   bottom: 20rpx;
   right: 0;
   z-index: 10;
 }
-.listWrap .checkBox.data-v-3e58cb09 {
+.listWrap .checkBox.data-v-1db66696 {
   position: absolute;
   left: -34rpx;
   top: 50%;
@@ -205,20 +205,20 @@ page {
   background-size: 100% 100%;
   z-index: 9;
 }
-.listWrap .checkBox.s.data-v-3e58cb09 {
-  left: auto;
-  top: 20rpx;
-  right: 20rpx;
-  -webkit-transform: none;
-          transform: none;
-  border-radius: 100%;
-  background: url(https://oohmonitoring.dentsuaegis.cn:8081/images/OSicons/uncheckbox.png) no-repeat center center;
-  background-size: 100% 100%;
+.listWrap .checkBox.s.data-v-1db66696 {
+    left: auto;
+    top: 20rpx;
+    right: 20rpx;
+    -webkit-transform: none;
+            transform: none;
+    border-radius: 100%;
+    background: url(https://oohmonitoring.dentsuaegis.cn:8081/images/OSicons/uncheckbox.png) no-repeat center center;
+    background-size: 100% 100%;
 }
-.listWrap .checkBox.cur.data-v-3e58cb09 {
-  background-image: url(https://oohmonitoring.dentsuaegis.cn:8081/images/OSicons/checkbox2.png);
+.listWrap .checkBox.cur.data-v-1db66696 {
+    background-image: url(https://oohmonitoring.dentsuaegis.cn:8081/images/OSicons/checkbox2.png);
 }
-.operation.data-v-3e58cb09 {
+.operation.data-v-1db66696 {
   position: fixed;
   bottom: 0;
   right: 0;
@@ -234,41 +234,41 @@ page {
   -webkit-justify-content: center;
           justify-content: center;
 }
-.operation view.data-v-3e58cb09 {
-  height: 80rpx;
-  line-height: 80rpx;
-  border-top: 2rpx solid #e6e6e6;
-  border-bottom: 2rpx solid #e6e6e6;
+.operation view.data-v-1db66696 {
+    height: 80rpx;
+    line-height: 80rpx;
+    border-top: 2rpx solid #e6e6e6;
+    border-bottom: 2rpx solid #e6e6e6;
 }
-.operation .selectAll.data-v-3e58cb09 {
-  width: 40%;
-  border-right: 2rpx solid #e6e6e6;
-  padding-left: 20rpx;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: flex;
-  -webkit-box-align: center;
-  -webkit-align-items: center;
-          align-items: center;
+.operation .selectAll.data-v-1db66696 {
+    width: 40%;
+    border-right: 2rpx solid #e6e6e6;
+    padding-left: 20rpx;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+            align-items: center;
 }
-.operation .selectAll .icon.data-v-3e58cb09 {
-  width: 35rpx;
-  height: 35rpx;
-  display: inline-block;
-  margin-right: 10rpx;
-  background: url(https://oohmonitoring.dentsuaegis.cn:8081/images/OSicons/uncheckbox1.png) no-repeat center center;
-  background-size: 100% 100%;
+.operation .selectAll .icon.data-v-1db66696 {
+      width: 35rpx;
+      height: 35rpx;
+      display: inline-block;
+      margin-right: 10rpx;
+      background: url(https://oohmonitoring.dentsuaegis.cn:8081/images/OSicons/uncheckbox1.png) no-repeat center center;
+      background-size: 100% 100%;
 }
-.operation .selectAll .icon.cur.data-v-3e58cb09 {
-  background-image: url(https://oohmonitoring.dentsuaegis.cn:8081/images/OSicons/checkbox2.png);
+.operation .selectAll .icon.cur.data-v-1db66696 {
+        background-image: url(https://oohmonitoring.dentsuaegis.cn:8081/images/OSicons/checkbox2.png);
 }
-.operation .but.data-v-3e58cb09 {
-  width: 30%;
-  color: #388188;
-  text-align: center;
+.operation .but.data-v-1db66696 {
+    width: 30%;
+    color: #388188;
+    text-align: center;
 }
-.operation .but.cur.data-v-3e58cb09 {
-  color: #fff;
-  background: #388188;
+.operation .but.cur.data-v-1db66696 {
+      color: #fff;
+      background: #388188;
 }
 

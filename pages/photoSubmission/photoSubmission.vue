@@ -183,6 +183,7 @@
 					})
 				})
 			},
+			// 唤起手机拍照/视频功能
 			chooseWxImageVideo(){
 				var _this = this;
 				this.options.implement = "false";
@@ -209,9 +210,9 @@
 										monitorStage: _this.seleSpotFile.monitorStage,
 										spotClassType: _this.seleSpotFile.spotClassType,
 										description: res1.latitude + ',' + res1.longitude,
-										phoneSystem: _this.systemInfo.system,
+										phoneSystem: '微信小程序',
 										phoneSystemVersion: _this.systemInfo.model,
-										phoneModel: _this.systemInfo.system,
+										phoneModel: '12.4 【'+ _this.systemInfo.version +'】',
 										isSelect: true,
 									}
 									if(_this.options.cameraType == 2){ // 拍照功能

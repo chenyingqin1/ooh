@@ -66,32 +66,32 @@ page {
 /*默认紫暂无*/
 /*默认黑*/
 /*默认白*/
-.moreList.data-v-db9f57ae {
+.moreList.data-v-f78fe856 {
   padding: 0 20rpx;
   background: #fff;
 }
-.moreList .item.data-v-db9f57ae {
-  height: 90rpx;
-  line-height: 90rpx;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: flex;
-  -webkit-box-align: center;
-  -webkit-align-items: center;
-          align-items: center;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-          justify-content: space-between;
-  border-bottom: 2rpx solid #f2f2f2;
+.moreList .item.data-v-f78fe856 {
+    height: 90rpx;
+    line-height: 90rpx;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+            align-items: center;
+    -webkit-box-pack: justify;
+    -webkit-justify-content: space-between;
+            justify-content: space-between;
+    border-bottom: 2rpx solid #f2f2f2;
 }
-.moreList .item .icon.data-v-db9f57ae {
-  width: 30rpx;
-  height: 30rpx;
-  float: right;
-  display: inline-block;
-  background: url(https://oohmonitoring.dentsuaegis.cn:8081/images/icons/icon-back-act.png) no-repeat center center;
-  background-size: 100% 100%;
-  -webkit-transform: rotate(180deg);
-          transform: rotate(180deg);
+.moreList .item .icon.data-v-f78fe856 {
+      width: 30rpx;
+      height: 30rpx;
+      float: right;
+      display: inline-block;
+      background: url(https://oohmonitoring.dentsuaegis.cn:8081/images/icons/icon-back-act.png) no-repeat center center;
+      background-size: 100% 100%;
+      -webkit-transform: rotate(180deg);
+              transform: rotate(180deg);
 }
 

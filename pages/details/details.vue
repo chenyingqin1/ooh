@@ -47,10 +47,11 @@
 			</view>
 		</view>
 		<view style="height: 80rpx;"></view>
-		<view class="but">提交</view>
+		<view class="but" @click="submitCh">提交</view>
 	</view>
 </template>
 <script>
+	const md5 = require('@/util/md5.js')
 	import allPage from "@/mixin/allPage_MX";
 	export default {
 		mixins: [allPage],
@@ -196,7 +197,74 @@
 					    url: "/pages/photoSubmission/photoSubmission?implement=" + isFile + "&cameraType=" + cameraType
 					})
 				}
-			},	
+			},
+			// 提交
+			submitCh(){
+				console.log(this.taskDetail)
+				let index = '-1';
+				// 查找当前监播阶段
+				for(let i=0; i<this.taskDetail.monitorStages.length; i++){
+					if(this.taskDetail.monitorStages[i].IsEnabled == true){
+						index = i;
+					}
+				}
+				index = 0;
+				// if(index != '-1'){
+					uni.showToast({
+						title: '提交中，请勿关闭当前页面',
+						icon: 'none',
+						mask: true
+					})
+					let bl = false;
+					for(let i=0; i<this.taskDetail.monitorStages[index].spotFiles.length; i++){
+						let item = this.taskDetail.monitorStages[index].spotFiles[i];
+						if(item.status == -1 || item.status == -2){
+							let parms = '},"spotFile":{"verificationCode":"' + md5.hex_md5(item.fileUrl) + '","taskId":"' + item.taskId + '","shootTime":"' + item.shootTime + '","lat":"' + item.lat + '","lon":"' + item.lon + '","location":"' + item.location + '","monitorStage":"' + item.monitorStage + '","spotClassType":"' + item.spotClassType + '","fileType":"' + item.fileType + '","description":"' + item.description + '","phoneSystem":"' + item.phoneSystem + '","phoneSystemVersion":"' + item.phoneSystemVersion + '","phoneModel":"' + item.phoneModel + '"}';
+							let fileUrl = item.fileUrl;
+							bl = true;
+							new Promise((resolve, reject) => {
+								this.$store.dispatch('myList/spotFileUploadAll', {parms, fileUrl,
+									callback: (res) => {
+										console.log(res);
+										res = JSON.parse(res)
+										if (res.errorCode == 0) {
+											resolve(item)
+										} else {
+											reject(item)
+										}
+										uni.showToast({
+											title: res.errorMsg,
+											icon: 'none',
+											mask: true
+										})
+									}
+								})
+							}).then((item) => {
+								this.fileUpdateStatus('-2', item)
+							}).catch((item) =>{
+								this.fileUpdateStatus('0', item)
+							})
+						}
+					}
+					if(!bl){
+						uni.showToast({
+							title: '暂无待提交图片或视频!',
+							icon: 'none',
+							mask: true
+						})
+					}
+				// }
+			},
+			// 更新文件状态
+			fileUpdateStatus(status, item){
+				console.log(item)
+				let parms = ',"openid":"' + this.userLogin.user.openid + '"},"spotFile":{"id":' + item.id + ',"status":"' + status + '"}';
+				this.$store.dispatch('details/taskfileUpdateStatus', {parms,
+					callback: (res) => {
+						this.getData();
+					}
+				})
+			},
 			tabChange(index){
 				this.currentIndex = index;
 			},

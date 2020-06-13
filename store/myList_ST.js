@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import {getFetch,postFetch} from '@/util/request_UT.js'
+import {getFetch,postFetch,globalUploadFile} from '@/util/request_UT.js'
 export default {
 	namespaced: true,
 	state: {
@@ -54,7 +54,7 @@ export default {
 			});
 		},
 		spotFileUploadAll(context, data){
-			getFetch('spot.file.upload.all', data.parms, (data2) => {
+			globalUploadFile('spot.file.upload.all', data.parms, data.fileUrl, (data2) => {
 				console.log(data2)
 				let val = data2.data;
 				if(data.callback){
