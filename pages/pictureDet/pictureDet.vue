@@ -89,8 +89,8 @@
 			// 图片浏览
 			flieBrowse(){
 				uni.previewImage({
-					urls: [this.SelectTempFlie.url],
-					current: 0
+					current: this.pictureDetInfo.fileUrl,
+					urls: [this.pictureDetInfo.fileUrl],
 				})
 			},
 		},

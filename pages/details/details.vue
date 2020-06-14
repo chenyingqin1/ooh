@@ -1,7 +1,7 @@
 <template>
 	<view class="page">
 		<view class="contentBox">
-			<view class="detailsInfo">
+			<view class="detailsInfo" v-show="taskDetail.name">
 				<view class="title">
 					<view class="name">任务名称：{{taskDetail.name}}</view>
 					<view class="time">
@@ -35,7 +35,7 @@
 											<image class="icon y" mode="widthFix" v-if="v.status == 0" src="https://oohmonitoring.dentsuaegis.cn:8081/images/icons/yun.png">
 											<image class="icon" mode="widthFix" @click.stop="deleteCh(item, v)" v-if="v.status == 0 || v.status == -1 || v.status == -2" src="https://oohmonitoring.dentsuaegis.cn:8081/images/icons/del.png">
 											<image class="img" mode="aspectFill" v-if="v.fileUrl && v.spotClassTypeName.indexOf('图片') != -1" :src="v.fileUrl">
-											<video class="img" :custom-cache="false" :id="'myvideo' + i" v-if="v.spotClassTypeName == '视频'" :show-center-play-btn="false" :controls="controls" bindended="endAction" :src="v.fileUrl"></video>
+											<video class="img" :id="'myvideo' + i" v-if="v.spotClassTypeName == '视频'" :show-center-play-btn="false" :custom-cache="false" :controls="controls" bindended="endAction" :src="v.fileUrl"></video>
 											<image class="video" v-if="v.spotClassTypeName == '视频'" src="https://oohmonitoring.dentsuaegis.cn:8081/images/icons/icon_play.png">
 										</block>
 									</view>
@@ -143,9 +143,9 @@
 			// 删除
 			deleteCh(item, v){
 				console.log(item)
-				// if(!item.IsEnabled){
-				// 	return false;
-				// }
+				if(!item.IsEnabled){
+					return false;
+				}
 				uni.showModal({
 					cancelText:'确定',  
 					confirmText:'取消',  
@@ -174,10 +174,14 @@
 			// 图片/视频点击
 			operationImage(item, v, index){
 				console.log(v)
-				// if(!item.IsEnabled){
-				// 	return false;
-				// }
-				if(v.status == 1){
+				if(item.IsEnabled && v.status != 1){
+					this.$store.state.details.seleSpotFile = v; //选中的文件信息
+					let isFile = v.fileUrl ? false : true;
+					this.$store.state.details.cameraType = v.spotClassTypeName == '视频' ? 1 : 2;
+					uni.navigateTo({
+						url: "/pages/photoSubmission/photoSubmission?implement=" + isFile
+					})
+				}else{
 					if(v.spotClassTypeName == '视频'){
 						this.controls = true;
 						let id = 'myvideo'+index;
@@ -185,17 +189,10 @@
 						videoContext.requestFullScreen();//执行全屏方法
 					}else{
 						uni.previewImage({
+							current: v.fileUrl,
 							urls: [v.fileUrl],
-							current: 0
 						})
 					}
-				}else{
-					this.$store.state.details.seleSpotFile = v; //选中的文件信息
-					let isFile = v.fileUrl ? false : true;
-					let cameraType = v.spotClassTypeName == '视频' ? 1 : 2;
-					uni.navigateTo({
-					    url: "/pages/photoSubmission/photoSubmission?implement=" + isFile + "&cameraType=" + cameraType
-					})
 				}
 			},
 			// 提交
@@ -208,20 +205,23 @@
 						index = i;
 					}
 				}
-				index = 0;
-				// if(index != '-1'){
+				// index = 0;
+				if(index != '-1'){
 					uni.showToast({
 						title: '提交中，请勿关闭当前页面',
 						icon: 'none',
 						mask: true
 					})
-					let bl = false;
+					uni.showLoading({
+						title: '提交中..'
+					});
+					let bl = [];
 					for(let i=0; i<this.taskDetail.monitorStages[index].spotFiles.length; i++){
 						let item = this.taskDetail.monitorStages[index].spotFiles[i];
 						if(item.status == -1 || item.status == -2){
 							let parms = '},"spotFile":{"verificationCode":"' + md5.hex_md5(item.fileUrl) + '","taskId":"' + item.taskId + '","shootTime":"' + item.shootTime + '","lat":"' + item.lat + '","lon":"' + item.lon + '","location":"' + item.location + '","monitorStage":"' + item.monitorStage + '","spotClassType":"' + item.spotClassType + '","fileType":"' + item.fileType + '","description":"' + item.description + '","phoneSystem":"' + item.phoneSystem + '","phoneSystemVersion":"' + item.phoneSystemVersion + '","phoneModel":"' + item.phoneModel + '"}';
 							let fileUrl = item.fileUrl;
-							bl = true;
+							bl.push(i);
 							new Promise((resolve, reject) => {
 								this.$store.dispatch('myList/spotFileUploadAll', {parms, fileUrl,
 									callback: (res) => {
@@ -237,23 +237,24 @@
 											icon: 'none',
 											mask: true
 										})
+										uni.hideLoading();
 									}
 								})
 							}).then((item) => {
-								this.fileUpdateStatus('-2', item)
-							}).catch((item) =>{
 								this.fileUpdateStatus('0', item)
+							}).catch((item) =>{
+								this.fileUpdateStatus('-2', item)
 							})
 						}
 					}
-					if(!bl){
+					if(bl.length == 0){
 						uni.showToast({
 							title: '暂无待提交图片或视频!',
 							icon: 'none',
 							mask: true
 						})
 					}
-				// }
+				}
 			},
 			// 更新文件状态
 			fileUpdateStatus(status, item){
@@ -261,7 +262,10 @@
 				let parms = ',"openid":"' + this.userLogin.user.openid + '"},"spotFile":{"id":' + item.id + ',"status":"' + status + '"}';
 				this.$store.dispatch('details/taskfileUpdateStatus', {parms,
 					callback: (res) => {
-						this.getData();
+						uni.switchTab({
+						    url: '/pages/index/index'
+						})
+						this.$store.state.home.isRefresh = true;
 					}
 				})
 			},

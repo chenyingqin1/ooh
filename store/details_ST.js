@@ -6,6 +6,7 @@ export default {
 		taskDetailInfo:{},
 		seleSpotFile:{},
 		positionInfo:{},
+		cameraType:null,
 	},
 	mutations: {
 		init(state, data){

@@ -17,7 +17,7 @@
 								<view class="name">
 									<view>品牌：{{item.brandName}}</view>
 									<view class="state">
-										<text class="stateNane">{{item.status | statusName}}</text>
+										<text class="stateNane" :class="{cur:item.status == '-2'}">{{item.status | statusName}}</text>
 									</view>
 								</view>
 								<view class="time">任务名称：{{item.taskName}}</view>
@@ -36,8 +36,11 @@
 								<text class="stateNane">{{item.status | statusName}}</text>
 							</view>
 							<view class="checkBox s" :class="{cur:item.checkBox}" @click.stop="selectCh(index)"></view>
-							<image class="img" mode="aspectFill" v-if="item.spotClassTypeName.indexOf('图片') != -1" :src="item.fileUrl">
-							<video class="img" id="myVideo" v-if="item.spotClassTypeName.indexOf('视频') != -1" :src="item.fileUrl" :controls="false"></video>
+							<view class="img">
+								<image class="iv" mode="aspectFill" v-if="item.spotClassTypeName.indexOf('图片') != -1" :src="item.fileUrl">
+								<video class="iv" id="myVideo" v-if="item.spotClassTypeName.indexOf('视频') != -1" :src="item.fileUrl" :controls="false" :show-center-play-btn="false"></video>
+								<image class="icon" v-if="item.spotClassTypeName.indexOf('视频') != -1" src="https://oohmonitoring.dentsuaegis.cn:8081/images/icons/icon_play.png">
+							</view>
 						</view>
 					</view>
 				</view>
@@ -63,8 +66,11 @@
 							</view>
 						</view>
 						<view class="block1" v-if="present">
-							<image class="img" mode="aspectFill" v-if="item.spotClassTypeName.indexOf('图片') != -1" :src="item.fileUrl">
-							<video class="img" id="myVideo" v-if="item.spotClassTypeName.indexOf('视频') != -1" :src="item.fileUrl" :controls="false"></video>
+							<view class="img">
+								<image class="iv" mode="aspectFill" v-if="item.spotClassTypeName.indexOf('图片') != -1" :src="item.fileUrl">
+								<video class="iv" id="myVideo" v-if="item.spotClassTypeName.indexOf('视频') != -1" :src="item.fileUrl" :controls="false" :show-center-play-btn="false"></video>
+								<image class="icon" v-if="item.spotClassTypeName.indexOf('视频') != -1" src="https://oohmonitoring.dentsuaegis.cn:8081/images/icons/icon_play.png">
+							</view>
 						</view>
 					</view>
 					<view class="noData" v-else><image mode="widthFix" src="https://oohmonitoring.dentsuaegis.cn:8081/images/OSicons/no-task-list.png" /></view>
@@ -126,7 +132,7 @@
 			
 		},
 		onLoad: function(options) {
-			this.getData();
+			this.getData()
 		},
 		mounted() {
 			
@@ -168,11 +174,15 @@
 							this.taskfileList.push(...data)
 							// 我的清单右上角添加文本
 							uni.setStorageSync('taskfileListNumber', this.taskfileList.length);
-							if(wx.getStorageSync("taskfileListNumber")){
-								let taskfileListNumber = wx.getStorageSync("taskfileListNumber");
+							let taskfileListNumber = wx.getStorageSync("taskfileListNumber");
+							if(wx.getStorageSync("taskfileListNumber") > 0){
 								uni.setTabBarBadge({//tabbar右上角添加文本
 									index: 1,
-									text: String(taskfileListNumber)
+									text: "" + wx.getStorageSync("taskfileListNumber") + ""
+								})
+							}else{
+								wx.removeTabBarBadge({//移除tabbar右上角的文本
+									index: 1,
 								})
 							}
 							if(data.length){
@@ -180,7 +190,7 @@
 							}
 						}else{
 							uni.showToast({
-								title: res.errorMsg,
+								title: res.errorMsg, 
 								icon: 'none',
 								mask: true
 							})
@@ -226,6 +236,7 @@
 			// 触发下拉刷新
 			onRefresh() {
 				if (this.freshing) return;
+				this.selectAllCheck = false;
 				this.updateLock = false;
 				this.freshing = true;
 				if (!this.triggered){//界面下拉触发，triggered可能不是true，要设为true  
@@ -301,7 +312,7 @@
 				}
 				ids.join(',')
 				console.log(ids)
-				let parms = ',"openid":"' + this.userLogin.user.openid + '"},"spotFile":{"id":' + ids + '}';
+				let parms = ',"openid":"' + this.userLogin.user.openid + '"},"spotFile":{"id":"' + ids + '"}';
 				uni.showModal({  
 					// title: '删除确认',  
 					cancelText:'确定',  
@@ -313,13 +324,7 @@
 								callback: (res) => {
 									console.log(res);
 									if (res.errorCode == 0) {
-										for(let i=0; i<this.taskfileList.length; i++){
-											for(let j=0; j<this.selectData.length; j++){
-												if(this.taskfileList[i].id == this.selectData[j].id){
-													this.taskfileList.splice(i,1)
-												}
-											}
-										}
+										this.onRefresh();
 										uni.showToast({
 											title: '删除成功',
 											icon: 'none',
@@ -358,21 +363,40 @@
 				for(let i=0; i<this.selectData.length; i++){ 
 					let item = this.selectData[i];
 					let parms = '},"spotFile":{"verificationCode":"' + md5.hex_md5(item.fileUrl) + '","taskId":"' + item.taskId + '","shootTime":"' + item.shootTime + '","lat":"' + item.lat + '","lon":"' + item.lon + '","location":"' + item.location + '","monitorStage":"' + item.monitorStage + '","spotClassType":"' + item.spotClassType + '","fileType":"' + item.fileType + '","description":"' + item.description + '","phoneSystem":"' + item.phoneSystem + '","phoneSystemVersion":"' + item.phoneSystemVersion + '","phoneModel":"' + item.phoneModel + '"}';
-					let fileUrl = item.fileUrl;
-					this.$store.dispatch('myList/spotFileUploadAll', {parms, fileUrl,
-						callback: (res) => {
-							console.log(res);
-							res = JSON.parse(res)
-							if (res.errorCode != 0) {
+					let fileUrl = item.fileUrl
+					new Promise((resolve, reject) => {
+						this.$store.dispatch('myList/spotFileUploadAll', {parms, fileUrl,
+							callback: (res) => {
+								console.log(res);
+								res = JSON.parse(res)
+								if (res.errorCode == 0) {
+									resolve(item)
+								} else {
+									reject(item)
+								}
 								uni.showToast({
 									title: res.errorMsg,
 									icon: 'none',
 									mask: true
 								})
 							}
-						}
+						})
+					}).then((item) => {
+						this.fileUpdateStatus('0', item)
+					}).catch((item) =>{
+						this.fileUpdateStatus('-2', item)
 					})
 				}
+			},
+			// 更新文件状态
+			fileUpdateStatus(status, item){
+				console.log(item)
+				let parms = ',"openid":"' + this.userLogin.user.openid + '"},"spotFile":{"id":' + item.id + ',"status":"' + status + '"}';
+				this.$store.dispatch('details/taskfileUpdateStatus', {parms,
+					callback: (res) => {
+						this.onRefresh();
+					}
+				})
 			}
 		},
 

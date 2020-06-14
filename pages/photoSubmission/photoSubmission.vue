@@ -5,14 +5,16 @@
 				<view class="list">
 					<view class="name">拍摄时间 {{selectTempFlie.shootTime?timestampToTime(selectTempFlie.shootTime):''}}</view>
 					<scroll-view :scroll-x="true">
-						<view class="imgBox" :class="{cur:selectImgIndex == index}" v-for="(item, index) in spareFlie" :key="index">
-							<image class="img" v-if="options.cameraType == '2'"  @click="selectImgCh(index)" @longpress="longpressCh(index)" :src="item.fileUrl">
-							<video class="img" v-if="options.cameraType == '1'"  @click="selectImgCh(index)" @longpress="longpressCh(index)" :controls="false" :src="item.fileUrl"></video>
+						<view class="imgBox" :class="{cur:selectImgIndex == index}" v-for="(item, index) in spareFlie" :key="index" @click="selectImgCh(index)" @longpress="longpressCh(index)">
+							<image class="img" v-if="cameraType == '2'" mode="aspectFill" :src="item.fileUrl">
+							<video class="img" v-if="cameraType == '1'" :src="item.fileUrl" :controls="false" :show-center-play-btn="false"></video>
+							<image class="icon" v-if="cameraType == '1'" src="https://oohmonitoring.dentsuaegis.cn:8081/images/icons/icon_play.png">
 						</view>
 					</scroll-view>
 				</view>
-				<image class="img" v-if="options.cameraType == '2'" mode="widthFix" @click="flieBrowse" :src="selectTempFlie.fileUrl">
-				<video class="video" v-if="options.cameraType == '1'" :custom-cache="false" :controls="controls" :poster="videoPosterImg" :src="selectTempFlie.fileUrl"></video>
+				<image class="img" v-if="cameraType == '2'" mode="aspectFill" @click="flieBrowse" :src="selectTempFlie.fileUrl">
+				<video class="video" v-if="cameraType == '1' && selectTempFlie.location" :src="selectTempFlie.fileUrl"></video>
+				<image class="img" v-if="cameraType == '1' && !selectTempFlie.location" mode="widthFix" src="https://oohmonitoring.dentsuaegis.cn:8081/images/OSicons/pv-bg.jpg">
 			</view>
 			<view class="info">
 				<view><text>拍摄地点</text>{{selectTempFlie.location}}</view>
@@ -20,7 +22,7 @@
 			</view>
 		</view>
 		<view class="operation flex-box">
-			<view class="flex-one" @click="chooseWxImageVideo">{{options.cameraType == '2' ? '继续拍照' : '继续拍视频'}}</view>
+			<view class="flex-one" @click="chooseWxImageVideo">{{cameraType == '2' ? '继续拍照' : '继续拍视频'}}</view>
 			<view class="flex-one cur" @click="submit">确认</view>
 		</view>
 	</view>
@@ -40,8 +42,6 @@
 		data() {
 			return {
 				options: null,
-				controls: false, //是否显示默认播放控件（播放/暂停按钮、播放进度、时间）
-				videoPosterImg: 'https://oohmonitoring.dentsuaegis.cn:8081/images/OSicons/pv-bg.jpg', //视频封面图
 				selectImgIndex: 0,
 				selectTempFlie:{  
 					fileUrl: 'https://oohmonitoring.dentsuaegis.cn:8081/images/OSicons/pv-bg.jpg',
@@ -62,8 +62,19 @@
 			seleSpotFile() {
 				return this.$store.state.details.seleSpotFile
 			},
+			cameraType() {
+				return this.$store.state.details.cameraType
+			},
 		},
 		onShow: function() {
+			
+		},
+		destroyed: function(){
+			
+		},
+		onLoad: function(options) {
+			console.log(this.cameraType)
+			this.options = options;
 			if(this.options.implement == "true"){
 				this.chooseWxImageVideo();
 			}else{
@@ -76,12 +87,6 @@
 				}
 				console.log(this.selectTempFlie)
 			}
-		},
-		destroyed: function(){
-			
-		},
-		onLoad: function(options) {
-			this.options = options;
 		},
 		onReady: function() {
 			
@@ -100,12 +105,7 @@
 			
 		},
 		watch: {
-			selectTempFlie(newVal, oldVal) {
-				if(newVal.location){
-					this.controls = true;
-					this.videoPosterImg = '';
-				}
-			}
+			
 		},
 		onPageScroll: function(e) {
 			
@@ -123,8 +123,8 @@
 			// 图片浏览
 			flieBrowse(){
 				uni.previewImage({
+					current: this.selectTempFlie.fileUrl,
 					urls: [this.selectTempFlie.fileUrl],
-					current: 0
 				})
 			},
 			// 图片长按删除
@@ -211,11 +211,11 @@
 										spotClassType: _this.seleSpotFile.spotClassType,
 										description: res1.latitude + ',' + res1.longitude,
 										phoneSystem: '微信小程序',
-										phoneSystemVersion: _this.systemInfo.model,
+										phoneSystemVersion: _this.systemInfo.model.replace(/[@<>#\$%\^&\*]+/g, ''),
 										phoneModel: '12.4 【'+ _this.systemInfo.version +'】',
 										isSelect: true,
 									}
-									if(_this.options.cameraType == 2){ // 拍照功能
+									if(_this.cameraType == 2){ // 拍照功能
 										uni.chooseImage({
 											sizeType: ['original','compressed'],
 											sourceType: ['camera'],
@@ -245,6 +245,7 @@
 													fileSize: res3.size,
 												})
 												_this.selectTempFlie = _this.spareFlie[0];
+												console.log(_this.spareFlie)
 											}
 										})
 									}

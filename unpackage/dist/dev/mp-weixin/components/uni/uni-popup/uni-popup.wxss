@@ -30,7 +30,7 @@
 /*默认紫暂无*/
 /*默认黑*/
 /*默认白*/
-.uni-popup.data-v-6b9b81f6 {
+.uni-popup.data-v-70089122 {
   position: fixed;
   top: 0;
   bottom: 0;
@@ -38,7 +38,7 @@
   right: 0;
   z-index: 99;
 }
-.uni-popup__mask.data-v-6b9b81f6 {
+.uni-popup__mask.data-v-70089122 {
   position: absolute;
   top: 0;
   bottom: 0;
@@ -47,40 +47,40 @@
   background-color: rgba(0, 0, 0, 0.4);
   opacity: 0;
 }
-.mask-ani.data-v-6b9b81f6 {
+.mask-ani.data-v-70089122 {
   -webkit-transition-property: opacity;
   transition-property: opacity;
   -webkit-transition-duration: 0.2s;
           transition-duration: 0.2s;
 }
-.uni-top-mask.data-v-6b9b81f6 {
+.uni-top-mask.data-v-70089122 {
   opacity: 1;
 }
-.uni-bottom-mask.data-v-6b9b81f6 {
+.uni-bottom-mask.data-v-70089122 {
   opacity: 1;
 }
-.uni-center-mask.data-v-6b9b81f6 {
+.uni-center-mask.data-v-70089122 {
   opacity: 1;
 }
-.uni-popup__wrapper.data-v-6b9b81f6 {
+.uni-popup__wrapper.data-v-70089122 {
   display: block;
   position: absolute;
 }
-.top.data-v-6b9b81f6 {
+.top.data-v-70089122 {
   top: 0;
   left: 0;
   right: 0;
   -webkit-transform: translateY(-500px);
           transform: translateY(-500px);
 }
-.bottom.data-v-6b9b81f6 {
+.bottom.data-v-70089122 {
   bottom: 0;
   left: 0;
   right: 0;
   -webkit-transform: translateY(500px);
           transform: translateY(500px);
 }
-.center.data-v-6b9b81f6 {
+.center.data-v-70089122 {
   display: -webkit-box;
   display: -webkit-flex;
   display: flex;
@@ -102,11 +102,11 @@
           transform: scale(1.2);
   opacity: 0;
 }
-.uni-popup__wrapper-box.data-v-6b9b81f6 {
+.uni-popup__wrapper-box.data-v-70089122 {
   display: block;
   position: relative;
 }
-.content-ani.data-v-6b9b81f6 {
+.content-ani.data-v-70089122 {
   -webkit-transition-property: opacity, -webkit-transform;
   transition-property: opacity, -webkit-transform;
   transition-property: transform, opacity;
@@ -114,15 +114,15 @@
   -webkit-transition-duration: 0.2s;
           transition-duration: 0.2s;
 }
-.uni-top-content.data-v-6b9b81f6 {
+.uni-top-content.data-v-70089122 {
   -webkit-transform: translateY(0);
           transform: translateY(0);
 }
-.uni-bottom-content.data-v-6b9b81f6 {
+.uni-bottom-content.data-v-70089122 {
   -webkit-transform: translateY(0);
           transform: translateY(0);
 }
-.uni-center-content.data-v-6b9b81f6 {
+.uni-center-content.data-v-70089122 {
   -webkit-transform: scale(1);
           transform: scale(1);
   opacity: 1;

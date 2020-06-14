@@ -151,12 +151,18 @@ export const globalUploadFile =  async (method, parm, filePath, callback, inparm
 				callback(data);
 			},
 			fail: (errMsg) => {
+				uni.showToast({
+					title: errMsg.errMsg,
+					icon: 'none',
+					mask: true
+				})
 				console.log('request fail', errMsg)
 			}
 		});
 		res.onProgressUpdate((res) => {
 			uni.showLoading({
-				title: res.progress
+				title: res.progress,
+				mask: true,
 			});
 			if(res.progress == 100){
 				uni.hideLoading()

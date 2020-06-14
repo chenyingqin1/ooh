@@ -86,6 +86,7 @@
 		},
 		data() {
 			return {
+				options: null,
 				isReady: false,
 				taskList: [],
 				pageNo: 1,
@@ -132,9 +133,14 @@
 			},
 		},
 		onShow: function() {
-			
+			if(this.$store.state.home.isRefresh){
+				this.onRefresh();
+				this.$store.state.home.isRefresh = false;
+			}
+			// this.onRefresh();
 		},
 		onLoad: function(options) {
+			this.options = options;
 			this.getData();
 			this.getFilterList();
 		},
@@ -158,7 +164,7 @@
 					title: '加载中'
 				});
 				let startDateStr = this.startDate ? ',"startDate":"' + this.startDate + '" ' : ''; //开始时间
-				let endDateStr = this.endDate ? ',"endDate":"' + endDate + '"' : ''; //结束时间
+				let endDateStr = this.endDate ? ',"endDate":"' + this.endDate + '"' : ''; //结束时间
 				let pageNo = this.pageNo; //页码
 				let pageSize = this.pageSize; //页数
 				let searchKey = this.searchKey; //任务地址

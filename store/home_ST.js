@@ -3,6 +3,7 @@ import {getFetch,postFetch} from '@/util/request_UT.js'
 export default {
 	namespaced: true,
 	state: {
+		isRefresh:false,
 		taskList:[],
 		FilterList:[],
 	},
