@@ -66,11 +66,11 @@ page {
 /*默认紫暂无*/
 /*默认黑*/
 /*默认白*/
-.explain.data-v-c2a8ddae {
+.explain.data-v-1dff1192 {
   padding: 50rpx 20rpx 100rpx;
   line-height: 40rpx;
 }
-.outLogin.data-v-c2a8ddae {
+.outLogin.data-v-1dff1192 {
   width: 95%;
   margin: 0 auto;
   height: 80rpx;

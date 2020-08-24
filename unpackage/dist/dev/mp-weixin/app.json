@@ -10,7 +10,9 @@
     "pages/location/location",
     "pages/details/details",
     "pages/photoSubmission/photoSubmission",
-    "pages/pictureDet/pictureDet"
+    "pages/pictureDet/pictureDet",
+    "pages/map/map",
+    "pages/cacheSetup/cacheSetup"
   ],
   "subPackages": [],
   "window": {
@@ -58,5 +60,5 @@
   },
   "plugins": {},
   "usingComponents": {},
-  "sitemapLocation": "sitemap17.json"
+  "sitemapLocation": "sitemap16.json"
 }

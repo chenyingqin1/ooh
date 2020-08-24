@@ -1,7 +1,7 @@
-<view class="page data-v-9f35c336"><view class="about bt data-v-9f35c336"><view class="con data-v-9f35c336">Posterscope是全球领先的户外传播代理公司。</view><view class="con data-v-9f35c336">Posterscope全球营业额超过22亿美元，我们有
-			700多名员工分布在32个国家、53个营业点。</view><view class="con data-v-9f35c336">我们致力于在相互联结的经济时代中，不断开创对
+<view class="page data-v-da513ce4"><view class="about bt data-v-da513ce4"><view class="con data-v-da513ce4">Posterscope是全球领先的户外传播代理公司。</view><view class="con data-v-da513ce4">Posterscope全球营业额超过22亿美元，我们有
+			700多名员工分布在32个国家、53个营业点。</view><view class="con data-v-da513ce4">我们致力于在相互联结的经济时代中，不断开创对
 			户外传播角色的认识，帮助客户实现简明、实效的户外
-			投放。</view><view class="con data-v-9f35c336">过去我们常说历史成就现在，而今，未来将决定现
-			世的走向。</view><view class="con data-v-9f35c336">我们的独到之处在于，更加了解新技术的应用及消
+			投放。</view><view class="con data-v-da513ce4">过去我们常说历史成就现在，而今，未来将决定现
+			世的走向。</view><view class="con data-v-da513ce4">我们的独到之处在于，更加了解新技术的应用及消
 			费者在户外的行为，并将两者结合，为广告主创造户外
-			传播新机会。</view><view class="edition data-v-9f35c336">版本号：01.01.0320</view></view><view data-event-opts="{{[['tap',[['outLogin',['$event']]]]]}}" class="outLogin data-v-9f35c336" bindtap="__e">退出登录</view></view>
+			传播新机会。</view><view class="edition data-v-da513ce4">版本号：01.01.0320</view></view><view data-event-opts="{{[['tap',[['outLogin',['$event']]]]]}}" class="outLogin data-v-da513ce4" bindtap="__e">退出登录</view></view>

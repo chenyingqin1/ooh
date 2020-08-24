@@ -19,7 +19,7 @@
 				<view class="flex-box"><text>拍摄时间</text><block class="flex-one">{{timestampToTime(pictureDetInfo.shootTime)}}</block></view>
 				<view class="flex-box"><text>拍摄地点</text><block class="flex-one">{{pictureDetInfo.taskLocation}}</block></view>
 				<view class="flex-box"><text>拍摄说明</text><block class="flex-one">{{pictureDetInfo.description}}</block></view>
-				<view class="flex-box"><text>文件类型</text><block class="flex-one">{{pictureDetInfo.spotClassTypeName}}{{pictureDetInfo.spotClassType}}</block></view>
+				<view class="flex-box"><text>文件类型</text><block class="flex-one">{{pictureDetInfo.spotClassTypeName}}</block></view>
 				<view class="flex-box"><text>文件大小</text><block class="flex-one">{{getFileSize(pictureDetInfo.fileSize)}}</block></view>
 			</view>
 		</uniPopup>

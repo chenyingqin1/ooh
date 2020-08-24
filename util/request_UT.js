@@ -38,17 +38,36 @@ export const getFetch =  async (method, parm, callback, inparm) => {
 		if(inparm){
 			header = Object.assign(header, inparm)
 		}
-		const res = await uni.request({
-			url: config.sumbitUrl,
-			method:'GET',
-			data: header,
-			success: (data) => {
-				callback(data);
-			},
-			fail({ errMsg }) {
-				console.log('request fail', errMsg)
-			}
-		});
+		await new Promise( resolve => {
+			uni.getNetworkType({
+				success (res) {
+					console.log(res)
+					const networkType = res.networkType;
+					if (networkType == "none") {
+						uni.showToast({
+							title: '没有网络连接',
+							icon: 'none',
+							mask: true
+						})
+						return false;
+					} else {
+						resolve()
+					}
+				}
+			})
+		}).then(() => {
+			const res = uni.request({
+				url: config.sumbitUrl,
+				method:'GET',
+				data: header,
+				success: (data) => {
+					callback(data);
+				},
+				fail({ errMsg }) {
+					console.log('request fail', errMsg)
+				}
+			});
+		})
 	}catch(e){
 		return {
 			code:-1,
@@ -90,17 +109,47 @@ export const postFetch =  async (method, parm, callback, inparm) => {
 		if(inparm){
 			header = Object.assign(header, inparm)
 		}
-		const res = await uni.request({
-			url: config.sumbitUrl,
-			method:'POST',
-			data: header,
-			success: (data) => {
-				callback(data);
-			},
-			fail({ errMsg }) {
-				console.log('request fail', errMsg)
-			}
-		});
+		await new Promise( resolve => {
+			uni.getNetworkType({
+				success (res) {
+					console.log(res)
+					const networkType = res.networkType;
+					if (networkType == "none") {
+						uni.showToast({
+							title: '没有网络连接',
+							icon: 'none',
+							mask: true
+						})
+						return false;
+					} else {
+						resolve()
+					}
+				}
+			})
+		}).then(() => {
+			const res = uni.request({
+				url: config.sumbitUrl,
+				method:'POST',
+				data: header,
+				success: (data) => {
+					callback(data);
+				},
+				fail({ errMsg }) {
+					console.log('request fail', errMsg)
+				}
+			});
+		})
+		// const res = await uni.request({
+		// 	url: config.sumbitUrl,
+		// 	method:'POST',
+		// 	data: header,
+		// 	success: (data) => {
+		// 		callback(data);
+		// 	},
+		// 	fail({ errMsg }) {
+		// 		console.log('request fail', errMsg)
+		// 	}
+		// });
 	}catch(e){
 		return {
 			code:-1,
@@ -142,32 +191,68 @@ export const globalUploadFile =  async (method, parm, filePath, callback, inparm
 		if(inparm){
 			header = Object.assign(header, inparm)
 		}
-		const res = await uni.uploadFile({
-			url: config.sumbitUrl,
-			filePath: filePath,
-			name: 'spotfile',
-			formData: header,
-			success: (data) => {
-				callback(data);
-			},
-			fail: (errMsg) => {
-				uni.showToast({
-					title: errMsg.errMsg,
-					icon: 'none',
-					mask: true
-				})
-				console.log('request fail', errMsg)
-			}
-		});
-		res.onProgressUpdate((res) => {
-			uni.showLoading({
-				title: res.progress,
-				mask: true,
+		await new Promise( resolve => {
+			uni.getNetworkType({
+				success (res) {
+					console.log(res)
+					const networkType = res.networkType;
+					if (networkType == "none") {
+						uni.showToast({
+							title: '没有网络连接',
+							icon: 'none',
+							mask: true
+						})
+						return false;
+					} else {
+						resolve()
+					}
+				}
+			})
+		}).then(() => {
+			const res = uni.uploadFile({
+				url: config.sumbitUrl,
+				filePath: filePath,
+				name: 'spotfile',
+				formData: header,
+				success: (data) => {
+					callback(data);
+				},
+				fail: (errMsg) => {
+					uni.showToast({
+						title: errMsg.errMsg,
+						icon: 'none',
+						mask: true
+					})
+					console.log('request fail', errMsg)
+				}
 			});
-			if(res.progress == 100){
-				uni.hideLoading()
-			}
 		})
+		// const res = await uni.uploadFile({
+		// 	url: config.sumbitUrl,
+		// 	filePath: filePath,
+		// 	name: 'spotfile',
+		// 	formData: header,
+		// 	success: (data) => {
+		// 		callback(data);
+		// 	},
+		// 	fail: (errMsg) => {
+		// 		uni.showToast({
+		// 			title: errMsg.errMsg,
+		// 			icon: 'none',
+		// 			mask: true
+		// 		})
+		// 		console.log('request fail', errMsg)
+		// 	}
+		// });
+		// res.onProgressUpdate((res) => {
+		// 	uni.showLoading({
+		// 		title: res.progress,
+		// 		mask: true,
+		// 	});
+		// 	if(res.progress == 100){
+		// 		uni.hideLoading()
+		// 	}
+		// })
 	}catch(e){
 		return {
 			code:-1,

@@ -6,7 +6,7 @@
 				<input class="i" placeholder="任务地址" v-model="searchKey" type="text" @confirm="onRefresh" confirm-type="search" />
 			</view>
 			<view class="switch"><text class="name">所有任务</text><switch class="section-right" color="#398188" @change="switchChange" /></view>
-			<view class="screen" @click="$refs.popup.open()">筛选<i class="icon"></i></view>
+			<view class="screen" @click="screenCh()">筛选<i class="icon"></i></view>
 		</view>
 		<view style="height: 90rpx;"></view>
 		<scroll-view class="scroll" :scroll-y="true" :style="{height: systemInfo.windowHeight-50 +'px'}" :enable-back-to-top="true" refresher-enabled="true" :refresher-triggered="triggered" @refresherrefresh="onRefresh" @scrolltolower="updateRefresh" @refresherrestore="onRestore" >
@@ -25,14 +25,14 @@
 					<view class="info">
 						<view class="flex-box">
 							<view class="flex-one">广告主：{{item.client}}</view>
-							<view class="flex-one">品牌：{{item.brandName}}</view>
+							<view class="flex-one"><image class="icon" mode="aspectFit" :src="item.Brandlogo">{{item.brandName}}</view>
 						</view>
 						<view>媒体规格：{{item.mediaName}}</view>
 						<view>任务地址：{{item.location}}</view>
 						<view>活动名称：{{item.campaignName}}</view>
 					</view>
 					<view class="flex-box operation">
-						<view class="flex-one but" v-for="(item1, index1) in item.monitorStages" :key="index" :class="{cur: item1.value >= 2}">{{item1.displayName}}<text class="icon"></text></view>
+						<view class="flex-one but" v-for="(item1, index1) in item.monitorStages" :key="index" :class="{cur: item1.value >= 3}">{{item1.displayName}}<text class="icon"></text></view>
 					</view>
 				</view>
 			</view>
@@ -63,8 +63,8 @@
 				</view>
 			</scroll-view>
 			<view class="searchOperation flex-box">
-				<view class="flex-one" @click="reset">重置</view>
-				<view class="flex-one cur" @click="onRefresh">确定</view>
+				<view class="flex-one" @click="reset">刷新</view>
+				<view class="flex-one cur" @click="onRefresh()">确定</view>
 			</view>
 		</uniPopup>
 		<uni-calendar ref="calendar" :insert="false" @confirm="confirmCalendar"/>
@@ -137,7 +137,6 @@
 				this.onRefresh();
 				this.$store.state.home.isRefresh = false;
 			}
-			// this.onRefresh();
 		},
 		onLoad: function(options) {
 			this.options = options;
@@ -237,14 +236,12 @@
 									data[key][i].select = false;
 								}
 							}
-							this.filterList.push(
-								{open: true,typeClass: '媒体规格',type: 'medias',typeName: data.medias,width:0,all:true},
+							this.filterList = [{open: true,typeClass: '媒体规格',type: 'medias',typeName: data.medias,width:0,all:true},
 								{open: true,typeClass: '城市',type: 'cities',typeName: data.cities,width:0},
 								{open: true,typeClass: '活动名称 (Campaign)',type: 'campaigns',typeName: data.campaigns,width:1,all:true},
 								{open: true,typeClass: '客户',type: 'clients',typeName: data.clients,width:0},
 								{open: true,typeClass: '活动类型',type: 'campaigntypes',typeName: data.campaigntypes,width:0},
-								{open: true,typeClass: '品牌',type: 'brands',typeName: data.brands,width:0},
-							)
+								{open: true,typeClass: '品牌',type: 'brands',typeName: data.brands,width:0}]
 						}else{
 							uni.showToast({
 								title: res.errorMsg,
@@ -287,6 +284,11 @@
 					this.endDate = '';
 				}
 			},
+			// 筛选
+			screenCh(){
+				// this.getFilterList();
+				this.$refs.popup.open();
+			},
 			// 选择条件选中
 			selectCh(index1, index2){
 				this.$set(this.filterList[index1].typeName[index2], 'select', !this.filterList[index1].typeName[index2].select);
@@ -295,13 +297,16 @@
 			},
 			// 重置条件
 			reset(){
-				this.startDate = '';
-				this.endDate = '';
-				for(let i=0; i<this.filterList.length; i++){
-					for(let j=0; j<this.filterList[i].typeName.length; j++){
-						this.$set(this.filterList[i].typeName[j], 'select', false);
-					}
-				}
+				this.getFilterList();
+				// this.startDate = '';
+				// this.endDate = '';
+				// for(let i=0; i<this.filterList.length; i++){
+				// 	for(let j=0; j<this.filterList[i].typeName.length; j++){
+				// 		this.$set(this.filterList[i].typeName[j], 'select', false);
+				// 	}
+				// }
+				// this.$forceUpdate()
+				// console.log(this.filterList)
 			},
 			// 所有任务switch
 			switchChange(e){
@@ -309,13 +314,17 @@
 				this.onRefresh();
 			},
 			// 触发下拉刷新
-			onRefresh() {
+			onRefresh(type) {
 				if (this.freshing) return;
 				this.updateLock = false;
 				this.freshing = true;
 				if (!this.triggered){//界面下拉触发，triggered可能不是true，要设为true  
 					this.triggered = true;  
 				};
+				// if (type != 1) {
+				// 	this.reset();
+				// 	this.getFilterList();
+				// }
 				this.pageNo = 1;
 				this.taskList = [];
 				this.$refs.popup.close();

@@ -63,8 +63,8 @@
 				.n{
 					display: inline-block;
 					text-align: center;
-					padding: 15rpx 0;
-					width: 180rpx;
+					padding: 15rpx 20rpx;
+					// width: 180rpx;
 					text-align: center;
 					background: #fff;
 					border: 2rpx solid #d9d9d9;
@@ -152,6 +152,7 @@
 							background: #1ac76b;
 							font-size: 24rpx;
 							border-radius: 20rpx;
+							z-index: 99;
 						}
 						.icon{
 							position: absolute;
@@ -199,4 +200,5 @@
 	width: 100%;
 	position: fixed;
 	bottom: 0;
+	z-index: 99;
 }

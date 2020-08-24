@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import {getFetch,postFetch} from '@/util/request_UT.js'
+import {getFetch,postFetch,globalUploadFile} from '@/util/request_UT.js'
 export default {
 	namespaced: true,
 	state: {
@@ -7,6 +7,9 @@ export default {
 		seleSpotFile:{},
 		positionInfo:{},
 		cameraType:null,
+		selectTempFlie:null,
+		temporaryFileList:null,
+		seleSpotFilesIndex:null,
 	},
 	mutations: {
 		init(state, data){
@@ -19,6 +22,10 @@ export default {
 		setPosition(state, data){
             Vue.set(state, 'positionInfo', data)
             uni.setStorageSync('positionInfo', state);
+		},
+		setTaskfileFilequery(state, data){
+            Vue.set(state, 'temporaryFileList', data)
+            uni.setStorageSync('temporaryFileList', state);
 		},
 	},
 	actions: {
@@ -54,6 +61,24 @@ export default {
 				}
 			});
 		},
+		// 文件信息暂存实时模式
+		taskfileUploadAll(context, data){
+			globalUploadFile('spot.taskfile.upload.all', data.parms, data.fileUrl, (data2) => {
+				console.log(data2)
+				let val =  JSON.parse(data2.data);
+				if(data.callback){
+					data.callback(val);
+				}
+			},data.inparm);
+		},
+		taskfileUploadAlls(context, data){
+			postFetch('spot.taskfile.upload.all', data.parms, (data2) => {
+				let val =  data2.data;
+				if(data.callback){
+					data.callback(val);
+				}
+			});
+		},
 		// 删除文件信息
 		fileDelete(context, data){
 			getFetch('spot.file.delete', data.parms, (data2) => {
@@ -69,6 +94,16 @@ export default {
 				let val = data2.data;
 				if(data.callback){
 					data.callback(val);
+				}
+			});
+		},
+		// 查询本机临时文件
+		getTaskfileFilequery(context, data){
+			getFetch('spot.taskfile.filequery', data.parms, (data2) => {
+				let val = data2.data;
+				context.commit("setTaskfileFilequery",val.spotFileResult.spotFiles);
+				if(data.callback){
+					data.callback(val.spotFileResult.spotFiles);
 				}
 			});
 		},

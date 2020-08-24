@@ -15,7 +15,8 @@
 							<view class="checkBox" :class="{cur:item.checkBox}" @click.stop="selectCh(index)"></view>
 							<view class="title">
 								<view class="name">
-									<view>品牌：{{item.brandName}}</view>
+									<!-- <view>品牌：{{item.brandName}}</view> -->
+									<view class="brand"><image class="icon" mode="aspectFit" :src="item.Brandlogo">{{item.brandName}}</view>
 									<view class="state">
 										<text class="stateNane" :class="{cur:item.status == '-2'}">{{item.status | statusName}}</text>
 									</view>
@@ -50,9 +51,11 @@
 				<view class="listWrap" :class="{cur:present}">
 					<view class="item" v-if="spotFilesList.length > 0" :class="{cur:present}" @click="goPictureDet(item)" v-for="(item, index) in spotFilesList" :key="index">
 						<view class="block cur" v-if="!present">
+							<image class="iconYs" v-if="item.status == 1" mode="aspectFill" src="https://oohmonitoring.dentsuaegis.cn:8081/images/icons/yishen.png">
 							<view class="title">
 								<view class="name">
-									<view>品牌：{{item.brandName}}</view>
+									<!-- <view>品牌：{{item.brandName}}</view> -->
+									<view class="brand"><image class="icon" mode="aspectFit" :src="item.Brandlogo">{{item.brandName}}</view>
 								</view>
 								<view class="time">任务名称：{{item.taskName}}</view>
 							</view>
@@ -70,6 +73,7 @@
 								<image class="iv" mode="aspectFill" v-if="item.spotClassTypeName.indexOf('图片') != -1" :src="item.fileUrl">
 								<video class="iv" id="myVideo" v-if="item.spotClassTypeName.indexOf('视频') != -1" :src="item.fileUrl" :controls="false" :show-center-play-btn="false"></video>
 								<image class="icon" v-if="item.spotClassTypeName.indexOf('视频') != -1" src="https://oohmonitoring.dentsuaegis.cn:8081/images/icons/icon_play.png">
+								<image class="iconYs" v-if="item.status == 1" mode="aspectFill" src="https://oohmonitoring.dentsuaegis.cn:8081/images/icons/yishen.png">
 							</view>
 						</view>
 					</view>
@@ -112,6 +116,7 @@
 				selectData: [],
 				triggered: false,
 				updateLock: false,
+				noGet: false,
 			}
 		},
 		filters: {
@@ -129,10 +134,12 @@
 			},
 		},
 		onShow: function() {
-			
+			if(this.currentIndex == 0 && this.taskfileList.length != wx.getStorageSync("taskfileListNumber") && this.noGet){
+				this.onRefresh()
+			}
 		},
 		onLoad: function(options) {
-			this.getData()
+			this.getData();
 		},
 		mounted() {
 			
@@ -143,7 +150,9 @@
 		onPageScroll: function(e) {
 			
 		},
-
+		onHide: function(){
+			this.noGet = true;
+		},
 		methods: {
 			getData(){
 				if(!this.updateLock){
@@ -172,19 +181,6 @@
 								data[i].checkBox = false;
 							}
 							this.taskfileList.push(...data)
-							// 我的清单右上角添加文本
-							uni.setStorageSync('taskfileListNumber', this.taskfileList.length);
-							let taskfileListNumber = wx.getStorageSync("taskfileListNumber");
-							if(wx.getStorageSync("taskfileListNumber") > 0){
-								uni.setTabBarBadge({//tabbar右上角添加文本
-									index: 1,
-									text: "" + wx.getStorageSync("taskfileListNumber") + ""
-								})
-							}else{
-								wx.removeTabBarBadge({//移除tabbar右上角的文本
-									index: 1,
-								})
-							}
 							if(data.length){
 								this.updateLock = false;
 							}
@@ -245,6 +241,8 @@
 				this.pageNo = 1;
 				this.taskfileList = [];
 				this.spotFilesList = [];
+				// 调用allPage里面的myListTips重新赋值角标
+				this.myListTips();
 				this.getData();
 			},
 			// 上拉加载
@@ -313,23 +311,29 @@
 				ids.join(',')
 				console.log(ids)
 				let parms = ',"openid":"' + this.userLogin.user.openid + '"},"spotFile":{"id":"' + ids + '"}';
-				uni.showModal({  
-					// title: '删除确认',  
-					cancelText:'确定',  
-					confirmText:'取消',  
+				uni.showModal({
 					content: '确定删除选中的任务吗？',  
 					success: (res) => {  
-						if (!res.confirm) {  
+						if (res.confirm) {
 							this.$store.dispatch('myList/taskfileDelete', {parms,
 								callback: (res) => {
 									console.log(res);
 									if (res.errorCode == 0) {
-										this.onRefresh();
 										uni.showToast({
 											title: '删除成功',
 											icon: 'none',
 											mask: true
 										})
+										// 提交前删除任务下的所有临时文件
+										this.selectData.forEach((val) => {
+											if (val.UploadStatus == 0) {
+												// 删除存储的垃圾数据
+												wx.removeSavedFile({
+													filePath: val.fileUrl,
+												});
+											}
+										})
+										this.onRefresh();
 									}else{
 										uni.showToast({
 											title: res.errorCode,
@@ -359,33 +363,76 @@
 					icon: 'none',
 					mask: true
 				})
-				console.log(this.selectData)
+				this.getTaskfileFilequery();
+				console.log(this.selectData);
 				for(let i=0; i<this.selectData.length; i++){ 
 					let item = this.selectData[i];
-					let parms = '},"spotFile":{"verificationCode":"' + md5.hex_md5(item.fileUrl) + '","taskId":"' + item.taskId + '","shootTime":"' + item.shootTime + '","lat":"' + item.lat + '","lon":"' + item.lon + '","location":"' + item.location + '","monitorStage":"' + item.monitorStage + '","spotClassType":"' + item.spotClassType + '","fileType":"' + item.fileType + '","description":"' + item.description + '","phoneSystem":"' + item.phoneSystem + '","phoneSystemVersion":"' + item.phoneSystemVersion + '","phoneModel":"' + item.phoneModel + '"}';
-					let fileUrl = item.fileUrl
-					new Promise((resolve, reject) => {
-						this.$store.dispatch('myList/spotFileUploadAll', {parms, fileUrl,
-							callback: (res) => {
-								console.log(res);
-								res = JSON.parse(res)
-								if (res.errorCode == 0) {
-									resolve(item)
-								} else {
-									reject(item)
+					let parms = ',"openid":"' + this.userLogin.user.openid + '"},"spotFile":{"verificationCode":"' + md5.hex_md5(item.fileUrl) + '","taskId":"' + item.taskId + '","shootTime":"' + item.shootTime + '","lat":"' + item.lat + '","lon":"' + item.lon + '","location":"' + item.location + '","monitorStage":"' + item.monitorStage + '","spotClassType":"' + item.spotClassType + '","fileType":"' + item.fileType + '","description":"' + item.description + '","phoneSystem":"' + item.phoneSystem + '","phoneSystemVersion":"' + item.phoneSystemVersion + '","phoneModel":"' + item.phoneModel + '","id":"' + item.id + '"}';
+					let fileUrl = item.fileUrl;
+					if (item.UploadStatus == 0) {
+						new Promise((resolve, reject) => {
+							this.$store.dispatch('myList/spotFileUploadAll', {parms, fileUrl,
+								callback: (res) => {
+									console.log(res);
+									res = JSON.parse(res)
+									uni.showToast({
+										title: res.errorMsg,
+										icon: 'none',
+										mask: true
+									})
+									setTimeout(()=>{ //为了不让提示信息一闪而过
+										if (res.errorCode == 0) {
+											resolve(item)
+											// 提交前删除任务下的所有临时文件
+											this.selectData.forEach((val) => {
+												// 删除存储的垃圾数据
+												wx.removeSavedFile({
+													filePath: val.fileUrl,
+												});
+											})
+										} else {
+											reject(item)
+										}
+									},1000);
 								}
-								uni.showToast({
-									title: res.errorMsg,
-									icon: 'none',
-									mask: true
-								})
-							}
+							})
+						}).then((item) => {
+							this.fileUpdateStatus('0', item)
+						}).catch((item) =>{
+							this.fileUpdateStatus('-2', item)
 						})
-					}).then((item) => {
-						this.fileUpdateStatus('0', item)
-					}).catch((item) =>{
-						this.fileUpdateStatus('-2', item)
-					})
+					} else {
+						new Promise((resolve, reject) => {
+							this.$store.dispatch('myList/spotFileUploadAlls', {parms,
+								callback: (res) => {
+									console.log(res);
+									uni.showToast({
+										title: res.errorMsg,
+										icon: 'none',
+										mask: true
+									})
+									setTimeout(()=>{ //为了不让提示信息一闪而过
+										if (res.errorCode == 0) {
+											resolve(item)
+											// 提交前删除任务下的所有临时文件
+											this.selectData.forEach((val) => {
+												// 删除存储的垃圾数据
+												wx.removeSavedFile({
+													filePath: val.fileUrl,
+												});
+											})
+										} else {
+											reject(item)
+										}
+									},1000);
+								}
+							})
+						}).then((item) => {
+							this.fileUpdateStatus('0', item)
+						}).catch((item) =>{
+							this.fileUpdateStatus('-2', item)
+						})
+					}
 				}
 			},
 			// 更新文件状态
@@ -395,6 +442,20 @@
 				this.$store.dispatch('details/taskfileUpdateStatus', {parms,
 					callback: (res) => {
 						this.onRefresh();
+					}
+				})
+			},
+			getTaskfileFilequery() {
+				// 删除任务下的所有临时文件
+				let ids = [];
+				for (let j=0; j<this.selectData.length; j++) {
+					ids.push(this.selectData[j].taskId)
+				}
+				let parms = ',"openid":"' + this.userLogin.user.openid + '"},"spotFileQuery":{"taskIdStr":"' + ids.join(',') +'"}';
+				this.$store.dispatch('details/getTaskfileFilequery', {
+					parms,
+					callback: (res) => {
+						console.log('文件list', res)
 					}
 				})
 			}

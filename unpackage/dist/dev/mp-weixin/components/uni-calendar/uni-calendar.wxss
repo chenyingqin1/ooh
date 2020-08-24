@@ -30,7 +30,7 @@
 /*默认紫暂无*/
 /*默认黑*/
 /*默认白*/
-.uni-calendar.data-v-75b2ab41 {
+.uni-calendar.data-v-3e06dd78 {
   display: -webkit-box;
   display: -webkit-flex;
   display: flex;
@@ -39,7 +39,7 @@
   -webkit-flex-direction: column;
           flex-direction: column;
 }
-.uni-calendar__mask.data-v-75b2ab41 {
+.uni-calendar__mask.data-v-3e06dd78 {
   position: fixed;
   bottom: 0;
   top: 0;
@@ -53,10 +53,10 @@
   opacity: 0;
   z-index: 99;
 }
-.uni-calendar--mask-show.data-v-75b2ab41 {
+.uni-calendar--mask-show.data-v-3e06dd78 {
   opacity: 1;
 }
-.uni-calendar--fixed.data-v-75b2ab41 {
+.uni-calendar--fixed.data-v-3e06dd78 {
   position: fixed;
   bottom: 0;
   left: 0;
@@ -71,14 +71,14 @@
           transform: translateY(460px);
   z-index: 99;
 }
-.uni-calendar--ani-show.data-v-75b2ab41 {
+.uni-calendar--ani-show.data-v-3e06dd78 {
   -webkit-transform: translateY(0);
           transform: translateY(0);
 }
-.uni-calendar__content.data-v-75b2ab41 {
+.uni-calendar__content.data-v-3e06dd78 {
   background-color: #fff;
 }
-.uni-calendar__header.data-v-75b2ab41 {
+.uni-calendar__header.data-v-3e06dd78 {
   position: relative;
   display: -webkit-box;
   display: -webkit-flex;
@@ -98,7 +98,7 @@
   border-bottom-style: solid;
   border-bottom-width: 1px;
 }
-.uni-calendar--fixed-top.data-v-75b2ab41 {
+.uni-calendar--fixed-top.data-v-3e06dd78 {
   display: -webkit-box;
   display: -webkit-flex;
   display: flex;
@@ -113,10 +113,10 @@
   border-top-style: solid;
   border-top-width: 1px;
 }
-.uni-calendar--fixed-width.data-v-75b2ab41 {
+.uni-calendar--fixed-width.data-v-3e06dd78 {
   width: 50px;
 }
-.uni-calendar__backtoday.data-v-75b2ab41 {
+.uni-calendar__backtoday.data-v-3e06dd78 {
   position: absolute;
   right: 0;
   top: 25rpx;
@@ -130,13 +130,13 @@
   color: #333;
   background-color: #f1f1f1;
 }
-.uni-calendar__header-text.data-v-75b2ab41 {
+.uni-calendar__header-text.data-v-3e06dd78 {
   text-align: center;
   width: 100px;
   font-size: 28rpx;
   color: #333;
 }
-.uni-calendar__header-btn-box.data-v-75b2ab41 {
+.uni-calendar__header-btn-box.data-v-3e06dd78 {
   display: -webkit-box;
   display: -webkit-flex;
   display: flex;
@@ -153,7 +153,7 @@
   width: 50px;
   height: 50px;
 }
-.uni-calendar__header-btn.data-v-75b2ab41 {
+.uni-calendar__header-btn.data-v-3e06dd78 {
   width: 10px;
   height: 10px;
   border-left-color: #808080;
@@ -163,15 +163,15 @@
   border-top-style: solid;
   border-top-width: 2px;
 }
-.uni-calendar--left.data-v-75b2ab41 {
+.uni-calendar--left.data-v-3e06dd78 {
   -webkit-transform: rotate(-45deg);
           transform: rotate(-45deg);
 }
-.uni-calendar--right.data-v-75b2ab41 {
+.uni-calendar--right.data-v-3e06dd78 {
   -webkit-transform: rotate(135deg);
           transform: rotate(135deg);
 }
-.uni-calendar__weeks.data-v-75b2ab41 {
+.uni-calendar__weeks.data-v-3e06dd78 {
   position: relative;
   display: -webkit-box;
   display: -webkit-flex;
@@ -181,12 +181,12 @@
   -webkit-flex-direction: row;
           flex-direction: row;
 }
-.uni-calendar__weeks-item.data-v-75b2ab41 {
+.uni-calendar__weeks-item.data-v-3e06dd78 {
   -webkit-box-flex: 1;
   -webkit-flex: 1;
           flex: 1;
 }
-.uni-calendar__weeks-day.data-v-75b2ab41 {
+.uni-calendar__weeks-day.data-v-3e06dd78 {
   -webkit-box-flex: 1;
   -webkit-flex: 1;
           flex: 1;
@@ -208,13 +208,13 @@
   border-bottom-style: solid;
   border-bottom-width: 1px;
 }
-.uni-calendar__weeks-day-text.data-v-75b2ab41 {
+.uni-calendar__weeks-day-text.data-v-3e06dd78 {
   font-size: 14px;
 }
-.uni-calendar__box.data-v-75b2ab41 {
+.uni-calendar__box.data-v-3e06dd78 {
   position: relative;
 }
-.uni-calendar__box-bg.data-v-75b2ab41 {
+.uni-calendar__box-bg.data-v-3e06dd78 {
   display: -webkit-box;
   display: -webkit-flex;
   display: flex;
@@ -230,7 +230,7 @@
   right: 0;
   bottom: 0;
 }
-.uni-calendar__box-bg-text.data-v-75b2ab41 {
+.uni-calendar__box-bg-text.data-v-3e06dd78 {
   font-size: 200px;
   font-weight: bold;
   color: #999;

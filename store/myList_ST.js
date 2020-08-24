@@ -60,7 +60,16 @@ export default {
 				if(data.callback){
 					data.callback(val);
 				}
-			},data.inparm);
+			});
+		},
+		spotFileUploadAlls(context, data){
+			getFetch('spot.file.upload.all', data.parms, (data2) => {
+				console.log(data2)
+				let val = data2.data;
+				if(data.callback){
+					data.callback(val);
+				}
+			});
 		},
 	},
 }

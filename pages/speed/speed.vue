@@ -54,13 +54,14 @@
 			},
 		},
 		onShow: function() {
-			
+			// Object.assign(this.$data,this.$options.data())
+			this.onRefresh();
 		},
 		onLoad: function(options) {
-			this.getData();
-			setTimeout(() => {
-				this.triggered = true;
-			}, 1000)
+			// this.getData();
+			// setTimeout(() => {
+				// this.triggered = true;
+			// }, 1000)
 		},
 		onReady: function() {
 			

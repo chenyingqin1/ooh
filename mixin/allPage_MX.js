@@ -15,6 +15,19 @@ module.exports = {
 		
 	},
 	onShow: function() {
+		// wx.getNetworkType({
+		// 	success (res) {
+		// 		const networkType = res.networkType;
+		// 		if (networkType == "none") {
+		// 			uni.showToast({
+		// 				title: '没有网络连接',
+		// 				icon: 'none',
+		// 				mask: true
+		// 			})
+		// 			return false;
+		// 		}
+		// 	}
+		// })
 		let _this = this;
 		uni.getSystemInfo({
 			success(res) {
@@ -22,53 +35,48 @@ module.exports = {
 			}
 		});
 		// 我的清单右上角添加文本
-		let pages = getCurrentPages()
-		this.pageURL = pages[pages.length-1].route
-		if(this.canSharePage.indexOf(this.pageURL)!=-1){
-			let parms = ',"openid":"' + this.userLogin.user.openid + '"},"spotFileQuery":{"pageNo":"1","pageSize":"50","keyword":""}';
-			this.$store.dispatch('myList/getTaskfileList', {parms,
-				callback: (res) => {
-					console.log(res);
-					if (res.errorCode == 0) {
-						let data = res.spotFileResult.spotFiles;
-						uni.setStorageSync('taskfileListNumber', data.length);
-						let taskfileListNumber = wx.getStorageSync("taskfileListNumber");
-						if(wx.getStorageSync("taskfileListNumber")){
-							uni.setTabBarBadge({//tabbar右上角添加文本
-								index: 1,
-								text: "" + wx.getStorageSync("taskfileListNumber") + ""
-							})
-						}else{
-							wx.removeTabBarBadge({//移除tabbar右上角的文本
-								index: 1,
-							})
-						}
-					}else{
-						
-					}
-				},
-			})
-		}else{
-			if(wx.getStorageSync("taskfileListNumber")){
-				uni.setTabBarBadge({//tabbar右上角添加文本
-					index: 1,
-					text: "" + wx.getStorageSync("taskfileListNumber") + ""
-				})
-			}else{
-				uni.setTabBarBadge({//tabbar右上角添加文本
-					index: 1,
-				})
-			}
-		}
+		this.myListTips();
 	},
 	methods: {
-		go(url){
-			uni.reLaunch({
-			    url: url
-			});
-		},
-		back(){
-			uni.navigateBack()
+		myListTips() {
+			let pages = getCurrentPages()
+			this.pageURL = pages[pages.length-1].route
+			if(this.canSharePage.indexOf(this.pageURL)!=-1){
+				let parms = ',"openid":"' + this.userLogin.user.openid + '"},"spotFileQuery":{"pageNo":"1","pageSize":"50","keyword":""}';
+				this.$store.dispatch('myList/getTaskfileList', {parms,
+					callback: (res) => {
+						console.log(res);
+						if (res.errorCode == 0) {
+							let data = res.spotFileResult.spotFiles;
+							uni.setStorageSync('taskfileListNumber', data.length);
+							let taskfileListNumber = wx.getStorageSync("taskfileListNumber");
+							if(wx.getStorageSync("taskfileListNumber")){
+								uni.setTabBarBadge({//tabbar右上角添加文本
+									index: 1,
+									text: "" + wx.getStorageSync("taskfileListNumber") + ""
+								})
+							}else{
+								wx.removeTabBarBadge({//移除tabbar右上角的文本
+									index: 1,
+								})
+							}
+						}else{
+							
+						}
+					},
+				})
+			}else{
+				if(wx.getStorageSync("taskfileListNumber")){
+					uni.setTabBarBadge({//tabbar右上角添加文本
+						index: 1,
+						text: "" + wx.getStorageSync("taskfileListNumber") + ""
+					})
+				}else{
+					uni.setTabBarBadge({//tabbar右上角添加文本
+						index: 1,
+					})
+				}
+			}
 		}
 	},
 	computed:{

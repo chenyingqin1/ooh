@@ -69,3 +69,24 @@ img{
 		display: block;
 	}
 }
+.moreList{
+	padding: 0 20rpx;
+	background: #fff;
+	.item{
+		height: 90rpx;
+		line-height: 90rpx;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		border-bottom: 2rpx solid #f2f2f2;
+		.icon{
+			width: 30rpx;
+			height: 30rpx;
+			float: right;
+			display: inline-block;
+			background: url(https://oohmonitoring.dentsuaegis.cn:8081/images/icons/icon-back-act.png) no-repeat center center;
+			background-size: 100% 100%;
+			transform: rotate(180deg);
+		}
+	}
+}

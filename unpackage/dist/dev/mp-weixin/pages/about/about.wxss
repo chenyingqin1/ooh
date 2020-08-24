@@ -66,19 +66,19 @@ page {
 /*默认紫暂无*/
 /*默认黑*/
 /*默认白*/
-.about.data-v-9f35c336 {
+.about.data-v-da513ce4 {
   background: #fff;
   padding: 20rpx;
 }
-.about .con.data-v-9f35c336 {
-  text-indent: 60rpx;
-  line-height: 60rpx;
+.about .con.data-v-da513ce4 {
+    text-indent: 60rpx;
+    line-height: 60rpx;
 }
-.about .edition.data-v-9f35c336 {
-  color: #969696;
-  line-height: 60rpx;
+.about .edition.data-v-da513ce4 {
+    color: #969696;
+    line-height: 60rpx;
 }
-.outLogin.data-v-9f35c336 {
+.outLogin.data-v-da513ce4 {
   width: 95%;
   margin: 80rpx auto 0;
   height: 80rpx;

@@ -66,6 +66,18 @@
 				"navigationStyle": "default",//"custom",
 				"navigationBarTitleText": "查看图片"
 			}
+		},{
+			"path": "pages/map/map", 
+			"style": {
+				"navigationStyle": "default",//"custom",
+				"navigationBarTitleText": "位置查看"
+			}
+		},{
+			"path": "pages/cacheSetup/cacheSetup", 
+			"style": {
+				"navigationStyle": "default",//"custom",
+				"navigationBarTitleText": "缓存设置"
+			}
 		}
 		
     ],

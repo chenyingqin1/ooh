@@ -12,13 +12,18 @@
 						</view>
 					</scroll-view>
 				</view>
-				<image class="img" v-if="cameraType == '2'" mode="aspectFill" @click="flieBrowse" :src="selectTempFlie.fileUrl">
-				<video class="video" v-if="cameraType == '1' && selectTempFlie.location" :src="selectTempFlie.fileUrl"></video>
-				<image class="img" v-if="cameraType == '1' && !selectTempFlie.location" mode="widthFix" src="https://oohmonitoring.dentsuaegis.cn:8081/images/OSicons/pv-bg.jpg">
+				<view class="fileBox">
+					<image class="img" v-if="cameraType == '2'" mode="aspectFill" @click="flieBrowse" :src="selectTempFlie.fileUrl">
+					<video class="video" v-if="cameraType == '1' && selectTempFlie.location" :src="selectTempFlie.fileUrl"></video>
+					<image class="img" v-if="cameraType == '1' && !selectTempFlie.location" mode="widthFix" src="https://oohmonitoring.dentsuaegis.cn:8081/images/OSicons/pv-bg.jpg">
+					<image class="icon" v-if="selectTempFlie.lat" @click.stop="map" :src="selectTempFlie.mapImgUrl">
+					<view class="num" v-if="userLogin.user.CaptureCacheMode != 1">{{userLogin.user.PhotosNum - (temporaryFileList.length + newSpareFlie.length) < 0 ? 0 : userLogin.user.PhotosNum - (temporaryFileList.length + newSpareFlie.length)}}/{{userLogin.user.PhotosNum}}</view>
+				</view>
 			</view>
 			<view class="info">
 				<view><text>拍摄地点</text>{{selectTempFlie.location}}</view>
-				<view class="flex-box"><text>说明</text><input class="flex-one input" type="text" :value="selectTempFlie.description"></view>
+				<!-- <view class="flex-box"><text>说明</text><input class="flex-one input" type="text" :value="selectTempFlie.description"></view> -->
+				<view class="flex-box"><text>说明</text><view class="flex-one" :style="{background: selectTempFlie.descriptionColour}">{{selectTempFlie.description}}</view></view>
 			</view>
 		</view>
 		<view class="operation flex-box">
@@ -42,14 +47,17 @@
 		data() {
 			return {
 				options: null,
-				selectImgIndex: 0,
+				selectImgIndex: null,
 				selectTempFlie:{  
 					fileUrl: 'https://oohmonitoring.dentsuaegis.cn:8081/images/OSicons/pv-bg.jpg',
 					shootTime: '',
 					location: '',
 					description: '',
 				},
+				seleSpotFile:null,
 				spareFlie:[],
+				newSpareFlie:[], //新增的文件
+				isClickSubmit: false, //是否点击确认
 			}
 		},
 		computed: {
@@ -59,33 +67,44 @@
 			userLogin() {
 				return this.$store.state.userLogin.userLogin
 			},
-			seleSpotFile() {
-				return this.$store.state.details.seleSpotFile
-			},
+			// seleSpotFile() {
+			// 	return this.$store.state.details.seleSpotFile
+			// },
 			cameraType() {
 				return this.$store.state.details.cameraType
 			},
+			temporaryFileList() {
+				return this.$store.state.details.temporaryFileList
+			},
+			seleSpotFilesIndex() {
+				return this.$store.state.details.seleSpotFilesIndex
+			},
 		},
 		onShow: function() {
-			
+			this.getTaskfileFilequery()
+			if (this.userLogin.user.CaptureCacheMode == 1) {
+				wx.setNavigationBarTitle({
+					title: '文件提交' 
+				})
+			} else {
+				wx.setNavigationBarTitle({
+					title: '文件提交（手机）' 
+				})
+			}
 		},
 		destroyed: function(){
 			
 		},
 		onLoad: function(options) {
+			console.log(this.temporaryFileList.length , this.spareFlie.length)
 			console.log(this.cameraType)
 			this.options = options;
+			this.seleSpotFile = this.$store.state.details.seleSpotFile;
 			if(this.options.implement == "true"){
 				this.chooseWxImageVideo();
 			}else{
-				this.spareFlie = this.seleSpotFile.imgList;
-				for(let i=0; i<this.seleSpotFile.imgList.length; i++){
-					if(this.seleSpotFile.imgList[i].isSelect){
-						this.selectTempFlie = this.seleSpotFile.imgList[i];
-						this.selectImgIndex = i;
-					}
-				}
-				console.log(this.selectTempFlie)
+				console.log(this.seleSpotFile);
+				this.setData();
 			}
 		},
 		onReady: function() {
@@ -110,7 +129,71 @@
 		onPageScroll: function(e) {
 			
 		},
+		destroyed() {
+			if (!this.isClickSubmit) {
+				this.newSpareFlie.forEach((val) => {
+					wx.removeSavedFile({
+						filePath: val.fileUrl,
+					});
+				})
+			};
+		},
 		methods: {
+			// 数据初始化处理
+			setData() {
+				new Promise(resolve => {
+					for(let i = 0; i < this.seleSpotFile.imgList.length; i++){
+						// 判断文件/目录是否存在
+						let _this = this;
+						let fileUrl = this.seleSpotFile.imgList[i].fileUrl;
+						if (fileUrl && (fileUrl.indexOf('wxfile') != -1 || fileUrl.indexOf('http://store') != -1 || fileUrl.indexOf('http://tmp') != -1)) {
+							if (this.seleSpotFile.imgList[i].spotClassTypeName == '视频') {
+								wx.getVideoInfo({
+									src: fileUrl,
+									success (res) {
+										_this.spareFlie.push(_this.seleSpotFile.imgList[i]);
+									},
+									complete (res) {
+										if (_this.seleSpotFile.imgList.length == i+1) {
+											resolve();
+										}
+									}
+								})
+							} else {
+								wx.getImageInfo({
+									src: fileUrl,
+									success (res) {
+										_this.spareFlie.push(_this.seleSpotFile.imgList[i]);
+									},
+									complete (res) {
+										if (_this.seleSpotFile.imgList.length == i+1) {
+											resolve();
+										}
+									}
+								})
+							}
+						} else {
+							this.spareFlie.push(this.seleSpotFile.imgList[i]);
+							if (_this.seleSpotFile.imgList.length == i+1) {
+								resolve();
+							}
+						}
+					}
+				}).then(res => {
+					console.log(this.spareFlie)
+					// 默认数据赋值
+					// this.selectTempFlie = this.spareFlie[0];
+					// this.selectImgIndex = 0;
+					for (let j = 0; j < this.spareFlie.length; j++) {
+						if(this.spareFlie[j].isSelect){
+							this.selectTempFlie = this.spareFlie[j];
+							this.selectImgIndex = j;
+							// break;
+						}
+					}
+					console.log(this.selectTempFlie)
+				})
+			},
 			// 图片视频选择
 			selectImgCh(index){
 				this.selectImgIndex = index;
@@ -130,36 +213,148 @@
 			// 图片长按删除
 			longpressCh(index){
 				let _this = this;
+				let text = this.cameraType == '1' ? '视频' : '图片';
 				uni.showModal({
 					title: '提示',
-					content: '是否确认删除图片？',
+					content: '是否确认删除'+ text +'？',
 					success (res) {
 						if (res.confirm) {
-							_this.spareFlie.splice(index, 1);
-							_this.selectTempFlie = _this.spareFlie.length > 0 ? _this.spareFlie[0] : {fileUrl: 'https://oohmonitoring.dentsuaegis.cn:8081/images/OSicons/pv-bg.jpg',shootTime: ''};
+							let data = _this.spareFlie[index];
+							wx.removeSavedFile({
+								filePath: data.fileUrl,
+							});
+							if (data.id) {
+								if (data.status == -1 || data.status == -2) {
+									// let parms = ',"openid":"' + _this.userLogin.user.openid + '"},"spotFile":{"taskId":' + data.taskId +
+									// 	', "spotClassType":' + data.spotClassType + ', "monitorStage":' + data.monitorStage + '}';
+									let parms = ',"openid":"' + _this.userLogin.user.openid + '"},"spotFile":{"id":' + data.id + '}';
+									_this.$store.dispatch('myList/taskfileDelete', {
+										parms,
+										callback: (res) => {
+											_this.temporaryFileListOp(index);
+										},
+									})
+								} else if (data.status == 0) {
+									let parms = '},"spotFile":{"id":' + data.id + '}';
+									_this.$store.dispatch('details/fileDelete', {
+										parms,
+										callback: (res) => {
+											_this.temporaryFileListOp(index);
+										},
+									})
+								}
+							} else {
+								for (let i = 0; i < _this.newSpareFlie.length; i++) {
+									if (_this.newSpareFlie[i].fileUrl == _this.spareFlie[index].fileUrl) {
+										_this.newSpareFlie.splice(i, 1);
+									}
+								}
+								_this.spareFlie.splice(index, 1);
+								if (_this.spareFlie.length > 0) {
+									_this.selectImgCh(0)
+								} else {
+									_this.selectTempFlie = {fileUrl: 'https://oohmonitoring.dentsuaegis.cn:8081/images/OSicons/pv-bg.jpg',shootTime: ''}
+								}
+							}
 						} else if (res.cancel) {
 							console.log('用户点击取消')
 						}
 					}
 				})
 			},
+			temporaryFileListOp(index) {
+				for (let i = 0; i < this.temporaryFileList.length; i++) {
+					if (this.temporaryFileList[i].fileUrl == this.spareFlie[index].fileUrl) {
+						this.temporaryFileList.splice(i, 1);
+					}
+				}
+				this.spareFlie.splice(index, 1);
+				if (this.spareFlie.length > 0) {
+					this.selectImgCh(0)
+				} else {
+					this.selectTempFlie = {fileUrl: 'https://oohmonitoring.dentsuaegis.cn:8081/images/OSicons/pv-bg.jpg',shootTime: ''}
+				}
+			},
+			// 地图查看
+			map(){
+				this.$store.state.details.selectTempFlie = this.selectTempFlie;
+				uni.navigateTo({
+				    url: "/pages/map/map"
+				})
+			},
 			// 确认
-			submit(){ 
+			submit(){
 				console.log(this.spareFlie)
-				new Promise(resolve => {
-					// 先删除已存的所有图片
-					let parms = ',"openid":"' + this.userLogin.user.openid + '"},"spotFile":{"taskId":' + this.seleSpotFile.taskId + ', "spotClassType":' + this.seleSpotFile.spotClassType + ', "monitorStage":' + this.seleSpotFile.monitorStage + '}';
-					this.$store.dispatch('myList/taskfileDelete', {parms,
-						callback: (res1) => {
-							console.log(res1);
-							resolve(res1)
-						},
+				if (!this.spareFlie.length) { return false }
+				this.isClickSubmit = true;
+				// 重新提交现所有的图片
+				uni.showLoading({
+					title: '提交中'
+				});
+				for (let z=0; z<this.spareFlie.length; z++) {
+					this.spareFlie[z].isSelect = false;
+					if (this.selectTempFlie.id == this.spareFlie[z].id) {
+						this.spareFlie[z].isSelect = true;
+						console.log('this.spareFlie[z]', this.spareFlie[z])
+					}
+				}
+				if (this.userLogin.user.CaptureCacheMode == 1) {
+					new Promise(resolve => {
+						for (let i = 0; i < this.spareFlie.length; i++) {
+							let parms = ',"openid":"' + this.userLogin.user.openid + '"},"spotFile":'+ JSON.stringify(this.spareFlie[i]) + '';
+							let fileUrl = this.spareFlie[i].fileUrl;
+							console.log(parms)
+							if (!this.spareFlie[i].UploadStatus || this.spareFlie[i].UploadStatus == 0) {
+								this.$store.dispatch('details/taskfileUploadAll', {parms, fileUrl,
+									callback: (res2) => {
+										console.log(res2);
+										wx.removeSavedFile({
+											filePath: fileUrl,
+										});
+										if (res2.errorCode == 0) {
+											if (this.spareFlie.length == i+1) {
+												resolve();
+											}
+										}else{
+											uni.showToast({
+												title: res2.errorMsg,
+												icon: 'none',
+												mask: true
+											})
+										}
+										uni.hideLoading();
+									},
+								})
+							} else {
+								this.$store.dispatch('details/taskfileUploadAlls', {parms,
+									callback: (res2) => {
+										console.log(res2);
+										if (res2.errorCode == 0) {
+											if (this.spareFlie.length == i+1) {
+												resolve();
+											}
+										}else{
+											uni.showToast({
+												title: res2.errorMsg,
+												icon: 'none',
+												mask: true
+											})
+										}
+										uni.hideLoading();
+									},
+								})
+							}
+						}
+					}).then(res => {
+						wx.navigateBack({
+							delta: 1,  // 返回上一级页面。
+							success: function() {
+								console.log('成功！')
+							}
+						})
 					})
-				}).then(res => {
-					// 重新提交现所有的图片
-					uni.showLoading({
-						title: '提交中'
-					});
+					
+				} else {
 					let parms = ',"openid":"' + this.userLogin.user.openid + '"},"spotFiles":'+ JSON.stringify(this.spareFlie) + '';
 					this.$store.dispatch('details/taskfileSave', {parms,
 						callback: (res2) => {
@@ -181,19 +376,37 @@
 							uni.hideLoading();
 						},
 					})
-				})
+				}
 			},
 			// 唤起手机拍照/视频功能
 			chooseWxImageVideo(){
+				console.log('临时文件总数', this.temporaryFileList.length + this.newSpareFlie.length)
+				if (this.temporaryFileList.length + this.newSpareFlie.length  > this.userLogin.user.PhotosNum - 1) {
+					uni.showToast({
+						title: '拍照数量不能超出' + this.userLogin.user.PhotosNum + '个,请先提交现有的拍照。',
+						icon: 'none',
+						mask: true
+					})
+					return false;
+				}
+				// pc打开不予执行
+				if(this.systemInfo.platform == "windows"){
+					uni.showToast({
+						title: '非法操作，不允许PC端上传！',
+						icon: 'none',
+						mask: true
+					})
+					return false
+				}
 				var _this = this;
 				this.options.implement = "false";
 				// 获取当前定位坐标,成功后才执行拍照/视频
 				wx.getLocation({
-					type: 'wgs84',
+					type: 'gcj02',
 					success: function (res1) {
 				        console.log(res1)
 						// 通过经纬度获取详细地址
-						let parms = '},"position":{"lat":"' + res1.latitude + '", "lng":"' + res1.longitude + '"}';
+						let parms = '},"position":{"lat":"' + res1.latitude + '", "lng":"' + res1.longitude + '", "taskId":"' + _this.seleSpotFile.taskId + '", "type":"GCJ02"}';
 						_this.$store.dispatch('details/getPosition', {parms,
 							callback: (res2) => {
 								console.log(res2)
@@ -204,31 +417,116 @@
 									let commonList = {
 										taskId: _this.seleSpotFile.taskId,
 										shootTime: _this.dateToUnix(_this.getCurrentTime()),
-										lat: res1.latitude,
-										lon: res1.longitude,
+										lat: res2.lat,
+										lon: res2.lon,
+										gcj02lat: res1.latitude,
+										gcj02lon: res1.longitude,
 										location: res2.spotLocation,
 										monitorStage: _this.seleSpotFile.monitorStage,
 										spotClassType: _this.seleSpotFile.spotClassType,
-										description: res1.latitude + ',' + res1.longitude,
+										description: res2.lat + ',' + res2.lon,
 										phoneSystem: '微信小程序',
 										phoneSystemVersion: _this.systemInfo.model.replace(/[@<>#\$%\^&\*]+/g, ''),
 										phoneModel: '12.4 【'+ _this.systemInfo.version +'】',
 										isSelect: true,
+										mapImgUrl: res2.mapImgUrl,
+										distanceName: res2.distanceName,
 									}
 									if(_this.cameraType == 2){ // 拍照功能
 										uni.chooseImage({
-											sizeType: ['original','compressed'],
+											sizeType: ['original'],
 											sourceType: ['camera'],
 											success: function(res3) {
 												console.log(res3);
-												_this.spareFlie.unshift({
-													...commonList,
-													fileUrl: res3.tempFiles[0].path,
-													thumbnailUrl: res3.tempFiles[0].path,
-													fileSize: res3.tempFiles[0].size,
+												// 保存文件到本地
+												uni.saveFile({
+													tempFilePath: res3.tempFilePaths[0],
+													success (res4) {
+														console.log(res4)
+														let item = {
+															...commonList,
+															fileUrl: res4.savedFilePath,
+															thumbnailUrl: res4.savedFilePath,
+															fileSize: res3.tempFiles[0].size,
+														}
+														let parms = ',"openid":"' + _this.userLogin.user.openid + '"},"spotFile":'+ JSON.stringify(item) + '';
+														let fileUrl = item.fileUrl;
+														if (_this.userLogin.user.CaptureCacheMode == 1) {
+															// 点击使用照片后,上传服务器
+															_this.$store.dispatch('details/taskfileUploadAll', {parms, fileUrl,
+																callback: (res2) => {
+																	console.log(res2);
+																	wx.removeSavedFile({
+																		filePath: fileUrl,
+																	});
+																	if (res2.errorCode == 0) {
+																		// 重新获取最新的那条选中数据,渲染页面
+																		let parms = ',"openid":"' + _this.userLogin.user.openid + '"},"taskQuery":{"taskId":' + _this.options.id + '}';
+																		_this.$store.dispatch('details/getTaskDetail', {parms,
+																			callback: (res2) => {
+																				console.log('res2', res2)
+																				_this.selectImgIndex = null;
+																				_this.selectTempFlie = {  
+																					fileUrl: 'https://oohmonitoring.dentsuaegis.cn:8081/images/OSicons/pv-bg.jpg',
+																					shootTime: '',
+																					location: '',
+																					description: '',
+																				};
+																				_this.spareFlie = [],
+																				_this.$set(_this, 'seleSpotFile', res2.taskResult.tasks[0].monitorStages[_this.seleSpotFilesIndex[0]].spotFiles[_this.seleSpotFilesIndex[1]])
+																			
+																				_this.setData();
+																			},
+																		})
+																	} else {
+																		uni.showToast({
+																			title: res2.errorMsg,
+																			icon: 'none',
+																			mask: true
+																		})
+																	}
+																},
+															})
+														} else {
+															// 点击使用照片后,上传服务器
+															_this.$store.dispatch('details/taskfileUploadAlls', {parms,
+																callback: (res2) => {
+																	console.log(res2);
+																	if (res2.errorCode == 0) {
+																		// 重新获取最新的那条选中数据,渲染页面
+																		let parms = ',"openid":"' + _this.userLogin.user.openid + '"},"taskQuery":{"taskId":' + _this.options.id + '}';
+																		_this.$store.dispatch('details/getTaskDetail', {parms,
+																			callback: (res2) => {
+																				console.log(res2)
+																				_this.selectImgIndex = null;
+																				_this.selectTempFlie = {  
+																					fileUrl: 'https://oohmonitoring.dentsuaegis.cn:8081/images/OSicons/pv-bg.jpg',
+																					shootTime: '',
+																					location: '',
+																					description: '',
+																				};
+																				_this.spareFlie = [],
+																				_this.$set(_this, 'seleSpotFile', res2.taskResult.tasks[0].monitorStages[_this.seleSpotFilesIndex[0]].spotFiles[_this.seleSpotFilesIndex[1]])
+																				
+																				_this.setData();
+																			},
+																		})
+																	} else {
+																		uni.showToast({
+																			title: res2.errorMsg,
+																			icon: 'none',
+																			mask: true
+																		})
+																	}
+																},
+															})
+														}
+														console.log(_this.selectTempFlie)
+													},
+													fail (res) {
+														console.log(res)
+													}
 												})
-												_this.selectTempFlie = _this.spareFlie[0];
-												console.log(_this.selectTempFlie)
 											}
 										})
 									}else{ // 视频功能
@@ -238,22 +536,139 @@
 											camera: 'back',
 											success(res3) {
 												console.log(res3)
-												_this.spareFlie.unshift({
-													...commonList,
-													fileUrl: res3.tempFilePath,
-													thumbnailUrl: res3.tempFilePath,
-													fileSize: res3.size,
+												if (res3.size < 200000) {
+													wx.removeSavedFile({
+														filePath: res3.tempFilePath,
+													});
+													uni.showToast({
+														title: '拍摄时间太短请重拍。',
+														icon: 'none',
+														mask: true,
+														duration: 5000,
+													})
+													return false
+												}
+												// 保存文件到本地
+												uni.saveFile({
+													tempFilePath: res3.tempFilePath,
+													success (res4) {
+														console.log(res4)
+														let item = {
+															...commonList,
+															fileUrl: res4.savedFilePath,
+															thumbnailUrl: res4.savedFilePath,
+															fileSize: res3.size,
+														}
+														let parms = ',"openid":"' + _this.userLogin.user.openid + '"},"spotFile":'+ JSON.stringify(item) + '';
+														let fileUrl = item.fileUrl;
+														if (_this.userLogin.user.CaptureCacheMode == 1) {
+															// 点击使用照片后,上传服务器
+															_this.$store.dispatch('details/taskfileUploadAll', {parms, fileUrl,
+																callback: (res2) => {
+																	console.log(res2);
+																	wx.removeSavedFile({
+																		filePath: fileUrl,
+																	});
+																	if (res2.errorCode == 0) {
+																		// 重新获取最新的那条选中数据,渲染页面
+																		let parms = ',"openid":"' + _this.userLogin.user.openid + '"},"taskQuery":{"taskId":' + _this.options.id + '}';
+																		_this.$store.dispatch('details/getTaskDetail', {parms,
+																			callback: (res2) => {
+																				console.log('res2', res2)
+																				_this.selectImgIndex = null;
+																				_this.selectTempFlie = {  
+																					fileUrl: 'https://oohmonitoring.dentsuaegis.cn:8081/images/OSicons/pv-bg.jpg',
+																					shootTime: '',
+																					location: '',
+																					description: '',
+																				};
+																				_this.spareFlie = [],
+																				_this.$set(_this, 'seleSpotFile', res2.taskResult.tasks[0].monitorStages[_this.seleSpotFilesIndex[0]].spotFiles[_this.seleSpotFilesIndex[1]])
+																			
+																				_this.setData();
+																			},
+																		})
+																	} else {
+																		uni.showToast({
+																			title: res2.errorMsg,
+																			icon: 'none',
+																			mask: true
+																		})
+																	}
+																},
+															})
+														} else {
+															// 点击使用照片后,上传服务器
+															_this.$store.dispatch('details/taskfileUploadAlls', {parms,
+																callback: (res2) => {
+																	console.log(res2);
+																	if (res2.errorCode == 0) {
+																		// 重新获取最新的那条选中数据,渲染页面
+																		let parms = ',"openid":"' + _this.userLogin.user.openid + '"},"taskQuery":{"taskId":' + _this.options.id + '}';
+																		_this.$store.dispatch('details/getTaskDetail', {parms,
+																			callback: (res2) => {
+																				console.log(res2)
+																				_this.selectImgIndex = null;
+																				_this.selectTempFlie = {  
+																					fileUrl: 'https://oohmonitoring.dentsuaegis.cn:8081/images/OSicons/pv-bg.jpg',
+																					shootTime: '',
+																					location: '',
+																					description: '',
+																				};
+																				_this.spareFlie = [],
+																				_this.$set(_this, 'seleSpotFile', res2.taskResult.tasks[0].monitorStages[_this.seleSpotFilesIndex[0]].spotFiles[_this.seleSpotFilesIndex[1]])
+																				
+																				_this.setData();
+																			},
+																		})
+																	} else {
+																		uni.showToast({
+																			title: res2.errorMsg,
+																			icon: 'none',
+																			mask: true
+																		})
+																	}
+																},
+															})
+														}
+														console.log(_this.spareFlie)
+													},
+													fail(error){
+														console.log(error)
+													}
 												})
-												_this.selectTempFlie = _this.spareFlie[0];
-												console.log(_this.spareFlie)
 											}
 										})
 									}
 								}
 							},
 						})
-						
 					},
+					fail(e){
+						console.log('获取坐标错误', e)
+						uni.showModal({
+							content: '需要获取您的位置用于在户外监播拍照模块记录您拍照的地点，若不允许，将无法拍照成功。',
+							success: (res) => {
+								if (res.confirm) {
+									uni.openSetting({
+										success(res) {
+											console.log(res.authSetting)
+										}
+									})
+								}
+							}
+						})
+					}
+				})
+			},
+			//查获取所有临时文件数据
+			getTaskfileFilequery() {
+				let parms = ',"openid":"' + this.userLogin.user.openid + '"},"spotFileQuery":{"taskIdStr":""}';
+				this.$store.dispatch('details/getTaskfileFilequery', {
+					parms,
+					callback: (res) => {
+						console.log('文件list', res)
+					}
 				})
 			},
 			// 获取当前时间

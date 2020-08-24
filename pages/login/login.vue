@@ -86,6 +86,7 @@
 							_this.$store.dispatch('userLogin/getUserLogin', {parms,
 								callback: (res) => {
 									console.log(res)
+									uni.hideLoading();
 									if(res.errorCode != 0){
 										uni.showModal({
 											content: res.errorMsg,
@@ -101,7 +102,6 @@
 										icon: 'none',
 										mask: true
 									})
-									uni.hideLoading();
 									uni.switchTab({
 									    url: '/pages/index/index'
 									});

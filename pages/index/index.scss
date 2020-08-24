@@ -108,6 +108,16 @@
 				line-height: 50rpx;
 				color: #9b9b9b;
 			}
+			.flex-one{
+				display: flex;
+				align-items: center;
+				justify-content: left;
+				.icon{
+					width: 90rpx;
+					height: 90rpx;
+					padding-right: 10rpx;
+				}
+			}
 		}
 		.operation{
 			border-top: 2rpx solid #e2e2e2;
@@ -198,11 +208,15 @@
 				background: #ededed;
 				border-radius: 12rpx;
 				margin-right: 2%;
+				margin-bottom: 10rpx;
 				display: flex;
 				align-items: center;
 				justify-content: space-around;
 				flex-direction: column;
 				float: left;
+				&:nth-of-type(3n){
+					margin-right: 0;
+				}
 				&:last-child{
 					margin-right: 0;
 				}

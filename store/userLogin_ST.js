@@ -27,6 +27,15 @@ export default {
 					data.callback(val);
 				}
 			});
+		},
+		// 用户设置缓存模式
+		setCaptureCacheMode(context, data){
+			getFetch('user.setCaptureCacheMode', data.parms, (data2) => {
+				let val = data2.data;
+				if(data.callback){
+					data.callback(val);
+				}
+			});
 		}
 	},
 }

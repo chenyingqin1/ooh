@@ -66,16 +66,16 @@ page {
 /*默认紫暂无*/
 /*默认黑*/
 /*默认白*/
-.statement.data-v-53ae64a9 {
+.statement.data-v-4c236ed2 {
   background: #fff;
   padding: 20rpx;
 }
-.statement .title.data-v-53ae64a9 {
-  font-weight: bold;
-  line-height: 60rpx;
+.statement .title.data-v-4c236ed2 {
+    font-weight: bold;
+    line-height: 60rpx;
 }
-.statement .con.data-v-53ae64a9 {
-  text-indent: 60rpx;
-  line-height: 60rpx;
+.statement .con.data-v-4c236ed2 {
+    text-indent: 60rpx;
+    line-height: 60rpx;
 }
 
